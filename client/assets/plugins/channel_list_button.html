@@ -1,0 +1,62 @@
+<script type="text/javascript">
+	// Add a channel list button in the toolbar
+	(function () {
+		var channelButtonAdded = false;
+
+	    var View = Backbone.View.extend({
+	        initialize: function (options) {
+				// Add channel list button
+				if(!channelButtonAdded) {
+					$(".main").prepend('<li><button class="btn btn-primary" id="chanlist">' +
+							   _kiwi.global.i18n.translate('client_applets_chanlist_channellist').fetch() +
+							   '</button></li>');
+			
+					this.styleChannelListButton();
+				}
+				
+				// Listen to layout change to adjust the button
+				kiwi.settings.on('change:channel_list_style', this.styleChannelListButton);
+				
+				// Add the action on the button
+				$(document).on("click","#chanlist",function() {
+					kiwi.components.Network().raw('LIST');
+				});
+			},
+			
+			// Adjust the css for the button
+			styleChannelListButton: function() {
+				if(_kiwi.global.settings.get('theme') == 'relaxed') {
+					// First reset styles if we've already built the button
+					if (channelButtonAdded) {
+						if(_kiwi.global.settings.get('channel_list_style') == 'list') {
+							$('#kiwi .toolbar .app_tools').css('width', 'auto');
+							$('#kiwi .toolbar .tabs').css('margin-right', 'auto');
+							$('#kiwi .toolbar .app_tools img').css('margin', 'auto');
+							$('#kiwi .toolbar .app_tools img, #kiwi .toolbar .app_tools i').css('position', 'auto');
+							$('#kiwi .toolbar .app_tools img, #kiwi .toolbar .app_tools i').css('top', 'auto');
+						} else if (_kiwi.global.settings.get('channel_list_style') == 'tabs') {
+							$('#kiwi .toolbar .app_tools').css('width', 'auto');
+							$('#kiwi .panels').css('top', '100px');
+						}
+					}
+					
+					if(_kiwi.global.settings.get('channel_list_style') == 'tabs') {
+						$('#kiwi .toolbar .app_tools').css('width', '+=30px');
+						$('#kiwi .toolbar .tabs').css('margin-right', '+=30px');
+						$('#kiwi .toolbar .app_tools img').css('margin', '0');
+						$('#kiwi .toolbar .app_tools img, #kiwi .toolbar .app_tools i').css('position', 'relative');
+						$('#kiwi .toolbar .app_tools img, #kiwi .toolbar .app_tools i').css('top', '5px');
+						$('#kiwi .toolbar .app_tools').css('margin-bottom', '7px');
+					} else if (_kiwi.global.settings.get('channel_list_style') == 'list') {
+						$('#kiwi .toolbar .app_tools').css('width', '100%');
+						$('#kiwi .toolbar .app_tools').css('margin-bottom', '7px');
+					}
+				}
+				
+				channelButtonAdded = true;
+			}			
+		});
+		
+		new View();
+	})();
+</script>
