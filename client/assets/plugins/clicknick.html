@@ -1,0 +1,90 @@
+<!-- Plugin Webfit pour KiwiIRC - http://www.webfit.fr - 07/2014 -->
+<style>
+.global_nick_highlight .nick {cursor: pointer;}
+.close_menu {cursor: pointer;}
+.close_menu label{cursor: pointer;}
+.close_menu input{cursor: pointer;}
+#kiwi .sep{ border-top:1px solid #eee; margin-top: 5px; margin-bottom: 4px;}
+</style>
+<script type="text/javascript">
+var cld= false;
+var nick= "";
+ $(document).on("contextmenu",".global_nick_highlight .nick",function(e){
+	 		$(this).trigger("click");
+			cld = true;
+	         return false;
+       
+    });
+
+ $(document).on("click","#kiwi .memberlists ul li .nick",function(e){ addMenu();	});
+
+ $(document).on("contextmenu","#kiwi .memberlists ul li .nick",function(e){
+	 
+	 		nick = $(this).html();
+			nick = nick.replace(/<span class="prefix">(.*)<\/span>/,"");
+			
+	 
+	 		$(this).trigger("click");
+			 var offset = $(this).offset();
+			   $(".ui_menu").css("top",offset.top+10);
+			   $(".ui_menu").css( "left",offset.left+10);	
+			  
+			return false;
+       
+    });
+	
+
+	$(document).on("click",".global_nick_highlight .nick", function (e) 
+	{
+		 if(e.which == 1 && cld == false) 
+		 {
+             var inp = $(".inp");
+			if(inp.val() == "")
+			{
+				inp.val($(this).html()+": ");
+			}
+			else
+			{
+				inp.val(inp.val()+" "+$(this).html()+": ");
+			}
+			$(".ui_menu").hide();
+        }
+		else 
+		{
+			nick = $(this).html();
+			   cld=false;
+			   var offset = $(this).offset();
+			   $(".ui_menu").css("top",offset.top+20);
+			   $(".ui_menu").css( "left",offset.left+120);
+			   addMenu();	
+			  
+        }
+	
+	});
+	
+	
+	
+	$(document).on("click",".salut", function (e) 
+	{
+		//'+kiwi.panels().active.get("name")+' 
+		var input = kiwi.components.ControlInput();
+		input.run('/me serre la main à son pote ' + nick);
+	});
+	
+	$(document).on("click",".bise", function (e) 
+	{
+		var input = kiwi.components.ControlInput();
+		input.run('/me fait une grooosse bise à ' + nick);
+	});
+	
+	$(document).on("click",".baffe", function (e) 
+	{
+		var input = kiwi.components.ControlInput();
+		input.run('/me met une grooosse baffe à ' + nick);
+	});
+	
+	function addMenu()
+	{
+		$(".ui_menu_content .userbox").append('<div class="sep"></div><a class="close_menu bise">Faire une bise !</a><a class="close_menu salut">Saluer</a><a class="close_menu baffe">Mettre une baffe !</a>');
+	}
+</script>

@@ -1,0 +1,34 @@
+<script type="text/javascript">
+	// Make settings button text
+	$(".inp").attr("placeholder","...");
+	(function () {
+	    var View = Backbone.View.extend({
+	        initialize: function (options) {
+				/*
+				$(".settings").html('<button class="btn btn-primary" id="settings">' +
+									kiwi.i18n.translate('client_applets_settings_title').fetch() +
+									'</button>');*/
+									
+				$("#kiwi .app_tools .main").prepend('<li><button id="ignorelist" class="btn btn-primary"><i class="fa fa-ban" title="'+kiwi.i18n.translate('client_applets_settings_title').fetch()+'"></i> <span class="txt">Liste des ignores</span></button> </li>');				
+			
+				$(".settings").html('<button class="btn btn-primary" id="settings">' +
+									'<i class="fa fa-gears" title="'+kiwi.i18n.translate('client_applets_settings_title').fetch()+'"></i> <span class="txt">'+kiwi.i18n.translate('client_applets_settings_title').fetch()+'</span>' +
+									'</button>');
+			
+				$(".startup").html('<button class="btn btn-primary" id="settings"><i class="fa fa-home" title="Home"></i></button>');
+				$(".app_tools ul li:last-child").html('<a target="_blank" href="https://www.andromede.net/"><img alt="Andromede" src="/kiwi/assets/img/ico.png"></a>');
+				
+				if(kiwi.settings.get('channel_list_style') == 'tabs') {
+					$('#kiwi .toolbar .app_tools').css('width', '+=60px');
+					$('#kiwi .toolbar .tabs').css('margin-right', '+=60px');
+				}
+				
+				
+				
+			}
+		});
+		
+		new View();
+	})();
+	
+</script>

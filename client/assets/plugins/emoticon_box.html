@@ -13,8 +13,8 @@
 	}
 	#emoticon-box {
 		width:auto;
-		background-color:#000;
-		display:none;
+		background-color:#eeeeee;
+		display:block;
 	}
 	.emoticonoindividual {
 		margin:3px!important;
@@ -44,7 +44,15 @@
 	$("div.controlbox").prepend("<div id='emoticon-box'></div>");
 	generar_iconos();
 	$("#emoticon-button").click(function () {
-		$('#emoticon-box').toggle();
+		$('#emoticon-box').toggle("fast",function()
+		{
+				var h = $(".controlbox").height();
+				$(".memberlists_resize_handle").css("bottom",h+"px");
+				$(".right_bar").css("bottom",h+"px");
+				$(".panels").css("bottom",h+"px");
+			
+		});
+		
 	});
 
     $(".emoticonoindividual").click(function () {

@@ -1,0 +1,140 @@
+<!-- Plugin Webfit pour KiwiIRC - http://www.webfit.fr - 07/2014 -->
+<style>
+#kiwi .controlbox .input .away { position: absolute; background: #eeeeee; z-index:2; color: #36c;  padding: 2px; left: 0; margin-left: 1px; cursor: pointer;}
+#kiwi .controlbox .input .nick:before {
+
+}
+#kiwi .controlbox .awayback {
+    background: none repeat scroll 0 0 #eeeeee;
+	border-left: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+    border-top: 1px solid #ddd;
+    color: #000;
+    left: 0;
+    padding: 10px;
+	width: 50px;
+	position: absolute;
+}
+#kiwi .controlbox .input .nick {
+  padding-left: 20px;
+  width: 9.5em;
+}
+.btn-warning {
+  color: #fff;
+  background-color: #f0ad4e;
+  border-color: #eea236;
+}
+.btn-warning:hover,
+.btn-warning:focus,
+.btn-warning:active,
+.btn-warning.active,
+.open > .dropdown-toggle.btn-warning {
+  color: #fff;
+  background-color: #ec971f;
+  border-color: #d58512;
+}
+.btn-warning:active,
+.btn-warning.active,
+.open > .dropdown-toggle.btn-warning {
+  background-image: none;
+}
+.btn-warning.disabled,
+.btn-warning[disabled],
+fieldset[disabled] .btn-warning,
+.btn-warning.disabled:hover,
+.btn-warning[disabled]:hover,
+fieldset[disabled] .btn-warning:hover,
+.btn-warning.disabled:focus,
+.btn-warning[disabled]:focus,
+fieldset[disabled] .btn-warning:focus,
+.btn-warning.disabled:active,
+.btn-warning[disabled]:active,
+fieldset[disabled] .btn-warning:active,
+.btn-warning.disabled.active,
+.btn-warning[disabled].active,
+fieldset[disabled] .btn-warning.active {
+  background-color: #f0ad4e;
+  border-color: #eea236;
+}
+
+</style>
+<script type="text/javascript">
+
+
+function awayToggle()
+{
+		var net = kiwi.components.Network();
+		
+		if(away)
+		{
+			$(".controlbox .away").css("color","");
+			$(".controlbox .away").html("S'abs");
+			away = false;
+			net.raw('AWAY');
+			$(".controlbox .awayback").slideDown(function(){$(this).remove();});
+		}
+		else
+		{
+			$(".controlbox .away").css("color","#ec971f");
+			$(".controlbox .away").html("Zzz");
+			away = true;
+			net.raw('AWAY :Je suis absent(e).');
+			$(".controlbox").prepend('<div class="awayback"><button class="btn btn-warning bt-baway">Zzz</button></div>');
+			
+			$(".controlbox .awayback").css("bottom", $(".controlbox").height() +1);
+			if($(".nickchange").length > 0)
+			{
+				$(".controlbox .awayback").css("left", 476);
+			}
+			else
+			{
+				$(".controlbox .awayback").css("left", 20);
+			}
+		}
+		
+}
+var away = false;
+	$(".input").prepend('<span class="away">S\'abs</span>');
+	$(document).on("click",".nickchange button", function() {
+		if($(".controlbox .awayback").length > 0 && $(".nickchange").length == 0)
+		{
+			$(".controlbox .awayback").css("left", 20);
+		}
+	});
+	
+	
+	$(document).on("click",".nickchange button", function() {
+		//ici cest moche ca sera à revoir quand on pourra detect les removes
+		setTimeout(function() {
+		if($(".nickchange").length== 0)
+		{
+			$(".controlbox .awayback").css("left", 20);
+		}},50);
+	});	
+			
+	
+	$(document).on("click",".nickchange .cancel", function() {
+		if($(".controlbox .awayback").length > 0)
+		{
+			$(".controlbox .awayback").css("left", 20);
+		}
+	});
+	$(".input .nick").click(function() {
+		
+
+		if($(".controlbox .awayback").length > 0)
+		{
+			$(".controlbox .awayback").css("left", 476);
+		}
+		});
+	
+	$(document).on("click",".controlbox .bt-baway",function(){
+		 awayToggle();
+	});
+	
+	$(document).on("click",".controlbox .away", function()
+	{
+	 awayToggle();
+		
+	});
+</script>

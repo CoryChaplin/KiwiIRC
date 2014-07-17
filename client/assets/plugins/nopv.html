@@ -1,0 +1,88 @@
+<!-- Plugin Webfit pour KiwiIRC - http://www.webfit.fr - 07/2014 -->
+<script>
+kiwi.plugins.on('loaded', function() {
+
+
+	 console.log(kiwi);
+
+	
+	var block_privatemsg_data = kiwi.components.DataStore.instance('kiwi.block_privatemsg');
+	block_privatemsg_data.load();
+	var block_privatemsg = block_privatemsg_data.get('block_privatemsg');
+	
+	
+  $("#settings").click(function() {
+	  if($("[data-setting='block_privatemsg']").length > 0)
+	  	return;
+	setTimeout(function() {
+	var loptions = $("[data-setting='show_joins_parts']").parent().parent().parent();
+    loptions.prepend('<div class="checkbox"><label><input type="checkbox" data-setting="block_privatemsg">Bloquer les messages privés</label></div>');
+	console.log("blockprivate = " + block_privatemsg);
+		 if(block_privatemsg)
+		 	$("[data-setting='block_privatemsg']").prop('checked', true);
+		else
+		$("[data-setting='block_privatemsg']").prop('checked', false);
+	},50);
+  });
+  
+  
+	if(block_privatemsg == null)
+	{
+		
+		block_privatemsg = false
+		block_privatemsg_data.set('block_privatemsg',false)
+		$(this).prop('checked', false);
+	}
+	else
+	{
+		console.log("ok on set l'option" + block_privatemsg);
+		$(this).prop('checked', block_privatemsg);
+	}
+	
+	
+	
+//	if($(this).prop('checked', false);
+	
+	$( document ).on("click", "[data-setting='block_privatemsg']", function() 
+	{
+		console.log("on modif les params " +  $(this).prop('checked'));
+		if(block_privatemsg)
+		{
+			console.log("on decheck");
+			$(this).prop('checked', false);
+			block_privatemsg_data.set('block_privatemsg',false);
+			block_privatemsg_data.save();
+			block_privatemsg = false;
+		}
+		else
+		{
+			console.log("on check");
+			$(this).prop('checked', true);
+			block_privatemsg_data.set('block_privatemsg',true);
+			block_privatemsg_data.save();
+			block_privatemsg = true;
+			
+		}
+	});
+	
+	   var net = kiwi.components.Network();
+	   
+	 	
+		
+
+	
+	kiwi.events.on('message:new', function(event,event_data)
+	{
+		
+		if(event_data.message.target == event_data.network.get('nick') && block_privatemsg) 
+		{
+			event.preventDefault();
+		}
+	
+
+	});
+	
+		
+		
+    
+}); </script>

@@ -1,0 +1,243 @@
+<!-- Plugin Webfit pour KiwiIRC - http://www.webfit.fr - 07/2014 -->
+<script>
+kiwi.plugins.on('loaded', function() {
+
+console.log(kiwi);
+
+//fix bug nicklist
+var width;
+var hide = false;
+$(document).on("click", ".right_bar .right-bar-toggle", function() 
+{
+	if(parseInt(width) > 0 && width != null)
+		{
+			$(".right_bar").css("width",width);
+			$(".memberlists_resize_handle").css("left",$("#kiwi").width() - parseInt(width) -10);
+		}
+		else
+		{
+			$(".right_bar").css("width",'');
+		}
+});
+$(document).on("click", ".right_bar .right-bar-toggle-inner", function()
+{
+	if($(".right_bar").hasClass("disabled"))
+	{
+		console.log($(".right_bar").css("width"));
+		if(parseInt($(".right_bar").css("width")) > 0)
+		{
+			console.log("on set width");
+			width = $(".right_bar").css("width");
+		}
+		
+		$(".right_bar").css("width",'');
+		
+			console.log("width = " + width);
+			
+	}
+	else
+	{
+
+		if( parseInt(width) > 0 && width != null)
+		{
+			$(".right_bar").css("width",width);
+		}
+		else
+		{
+			$(".right_bar").css("width",'');
+		}
+	}
+	
+});
+
+
+
+// fin fix
+
+
+
+// bouton
+
+$(document).on("click",".pv_whois", function() {
+	var net = kiwi.components.Network();
+	net.raw('WHOIS :' +kiwi.panels().active.get("name"));
+	
+});
+
+
+$(document).on("click",".pv_ignore", function() {
+		
+		
+		var ignorelist_data = kiwi.components.DataStore.instance('kiwi.ignore_list');
+	ignorelist_data.load();
+	var ignorelist = ignorelist_data.get('ignore_list');
+		
+		var tab = kiwi.connections.active_connection.get("ignore_list");
+		var i = tab.indexOf(kiwi.panels().active.get("name"));
+		
+		console.log("i = " + i);
+		
+		if(i == -1)
+		{
+			tab.push(kiwi.panels().active.get("name"));
+			$(this).addClass("cred");
+
+		}
+		else
+		{
+			tab.splice(i,1);
+			$(this).removeClass("cred");
+		}
+		kiwi.connections.active_connection.set("ignore_list",tab);
+		
+		ignorelist_data.set('ignore_list',tab);
+		ignorelist_data.save();
+		
+
+	
+});
+// barre
+
+
+
+
+var html = '<div class="right_bar_pv"  style="top: ' + $(".toolbar").height() + 'px; bottom: ' + ($(".controlbox").height() + 1) + 'px;"> \
+			<div class="right-bar-toggle" style="display: none;"><i class="fa fa-user"></i></div> \
+			<div class="right-bar-content">\
+						<div class="channel_tools">\
+							<i title="Channel Info" class="fa fa-search pv_whois"></i>\
+							<i title="Leave Channel" class="fa fa-minus-circle pv_ignore"></i>\
+							<i title="Hide" class="fa fa-angle-double-right right-bar-toggle-inner"></i>\
+						</div>\
+						 </div>\
+			</div>';
+	
+$(document).on("click", ".part", function () {
+
+
+	if (!kiwi.panels().active.isQuery()) 
+	{
+	
+		$(".right_bar_pv").addClass("disabled");
+		
+	}
+
+
+});
+	
+$(document).on("click", ".right_bar_pv .right-bar-toggle", function () {
+    $(".right_bar_pv").css("width", '');
+    $(this).hide();
+    $(".panels").css("right", $(".right_bar_pv").width());
+	hide = false;
+});
+$(document).on("click", ".right_bar_pv .right-bar-toggle-inner", function () {
+    $(".right_bar_pv").css("width", "0");
+    $(".panels").css("right", $(".right_bar_pv").width());
+
+    $(".right_bar_pv .right-bar-toggle").show();
+	hide = true;
+});
+$(document).on("click", ".userbox .query", function () {
+    console.log("on click pour ouvrir le pv");
+    //fix bug
+    $(".right_bar .right-bar-toggle-inner").trigger("click");
+    if (kiwi.panels().active.isQuery()) {
+		
+        if ($(".right_bar_pv").length > 0) {
+			
+            $(".right_bar_pv").removeClass("disabled");
+            $(".panels").css("right", $(".right_bar_pv").width());
+
+        } else {
+            $("#kiwi").prepend(html);
+            $(".panels").css("right", $(".right_bar_pv").width());
+			
+        }
+		ignoreornot();
+    }
+});
+
+$(document).on("click", ".panellist li", function () 
+{
+
+	if (kiwi.panels().active.isQuery()) 
+	{
+		console.log("cest un pv");
+		//fix bug
+		$(".right_bar .right-bar-toggle-inner").trigger("click");
+	
+	
+		
+		if ($(".right_bar_pv").length > 0) 
+		{
+			if(hide)
+			{
+				$(".right_bar_pv .right-bar-toggle").show();
+			}
+			$(".right_bar_pv").removeClass("disabled");
+			$(".panels").css("right", $(".right_bar_pv").width());
+			
+		} 
+		else 
+		{
+			$("#kiwi").prepend(html);
+			$(".panels").css("right", $(".right_bar_pv").width());
+		}
+		ignoreornot();
+	} 	
+	else 
+	{
+		$(".memberlists_resize_handle").show();
+		$(".right_bar_pv").addClass("disabled");
+		if(hide)
+		{
+			$(".right_bar_pv .right-bar-toggle").hide();
+		}
+		
+	}
+
+
+
+});
+
+
+
+function ignoreornot()
+{
+		console.log(kiwi.panels().active.get('members'));
+	
+		var tab = kiwi.connections.active_connection.get("ignore_list");
+		var i = tab.indexOf(kiwi.panels().active.get("name"));
+
+		if(i == -1)
+		{
+			$(".pv_ignore").removeClass("cred");
+			
+
+		}
+		else
+		{
+			$(".pv_ignore").addClass("cred");
+		}
+}
+});
+ </script>
+
+<style>
+#kiwi .cred {color: #ff0000;}
+#kiwi .right_bar_pv {
+    background-color: #fff;
+    border-left: 1px dashed #ccc;
+	z-index: 10;
+	   bottom: 100px;
+    overflow: visible;
+    position: absolute;
+    right: 0;
+    top: 100px;
+    width: 200px;
+}
+#kiwi .right_bar_pv.disabled {
+    width: 0;
+}
+</style>
