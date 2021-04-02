@@ -121,10 +121,12 @@ var handlers = {
         var channel, time;
         if (typeof command.params[0] === 'string' && command.params[0] !== '') {
             channel = command.params[0];
+            this.irc_connection.write('WHO ' + channel);
         }
 
         // Check if we have a server-time
         time = command.getServerTime();
+        
 
         this.emit('channel ' + channel + ' join', {
             nick: command.nick,
