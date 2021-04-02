@@ -1,12 +1,13 @@
+<style>
+</style>
 <script type="text/javascript">
     // File picker plugin
     // Author: https://github.com/pepijndevos/
     
     $script("//api.filepicker.io/v1/filepicker.js", function () {
-        var network = kiwi.components.Network();
         var control = kiwi.components.ControlInput();
 
-        filepicker.setKey("YOUR_API_KEY");
+        filepicker.setKey("AFDstUhzT9SW0Kl2yS7Egz");
 
         function uploaded(files) {
             var area = $("#kiwi .controlbox textarea");
@@ -19,7 +20,7 @@
 
         filepicker.makeDropPane($("#kiwi .panels")[0], { onSuccess: uploaded });
 
-        var $icon = $("<a class=\"upload\" title=\"Send File\"><i class=\"fa fa-upload\"></i></a>");
+        var $icon = $('<a id="upload" class="upload" title="Send File"><i class="fa fa-upload"></i></a>');
         $icon.click(function () { filepicker.pickMultiple(uploaded); });
 
         control.addPluginIcon($icon);

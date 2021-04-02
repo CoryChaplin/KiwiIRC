@@ -16,6 +16,10 @@ msgstr ""
 "Project-Id-Version: Kiwi\n"
 "Language: fr\n"
 
+#:
+msgid "client_views_controlbox_message"
+msgstr "Envoyer un message..."
+
 #: client/assets/src/applets/chanlist.js
 msgid "client_applets_chanlist_channelname"
 msgstr "Salon"
@@ -49,6 +53,30 @@ msgid "client_applets_scripteditor_title"
 msgstr "Éditeur de Script"
 
 #: client/assets/src/applets/settings.js
+msgid "client_applets_settings_messages"
+msgstr "Messages"
+
+#: client/assets/src/applets/settings.js
+msgid "client_applets_settings_chat_messages"
+msgstr "Messages du chat"
+
+#: client/assets/src/applets/settings.js
+msgid "client_applets_settings_alerts_notifications"
+msgstr "Alertes / Notifications"
+
+#: client/assets/src/applets/settings.js
+msgid "client_applets_settings_appearance"
+msgstr "Apparence"
+
+#: client/assets/src/applets/settings.js
+msgid "client_applets_settings_theme"
+msgstr "Thème"
+
+#: client/assets/src/applets/settings.js
+msgid "client_applets_settings_channels"
+msgstr "Salons"
+
+#: client/assets/src/applets/settings.js
 msgid "client_applets_settings_channelview_tabs"
 msgstr "Onglets"
 
@@ -59,6 +87,10 @@ msgstr "Liste"
 #: 
 msgid "client_applets_settings_channelview_list_notice"
 msgstr "pour un grand nombre de salons"
+
+#: 
+msgid "client_applets_settings_language"
+msgstr "Langue"
 
 #: 
 msgid "client_applets_settings_notification_joinpart"
@@ -75,6 +107,10 @@ msgstr "Mettre en sourdine les notifications"
 #: 
 msgid "client_applets_settings_history_length"
 msgstr "Messages dans l'historique"
+
+#: 
+msgid "client_applets_settings_custom_highlights"
+msgstr "Notifications personnalisées (séparées par des espaces)"
 
 #: 
 msgid "client_applets_settings_default_client"
@@ -408,6 +444,31 @@ msgstr "Serveur introuvable."
 msgid "client_views_serverselect_connection_refused"
 msgstr "Connexion refusée."
 
+#: 
+msgid "client_views_serverselect_age"
+msgstr "Age"
+
+#: 
+msgid "client_views_serverselect_gender"
+msgstr "Sexe"
+
+#: 
+msgid "client_views_serverselect_gender_f"
+msgstr "Femme"
+
+#: 
+msgid "client_views_serverselect_gender_m"
+msgstr "Homme"
+
+#: 
+msgid "client_views_serverselect_gender_u"
+msgstr "Autre"
+
+#: 
+msgid "client_views_serverselect_location"
+msgstr "Ville"
+
+
 #: client/assets/src/views/userbox.js
 msgid "client_views_userbox_op"
 msgstr "Op"
@@ -469,6 +530,11 @@ msgid "client_applets_settings_emoticons"
 msgstr "Afficher les émoticônes"
 
 #: 
+msgid "client_applets_settings_allow_queries"
+msgstr "Autoriser les nouveaux dialogues privés"
+
+
+#: 
 msgid "client_applet_about"
 msgstr "À propos de Kiwi"
 
@@ -503,6 +569,30 @@ msgstr "Sauvegarder le réseau"
 #: 
 msgid "client_applet_fav_delete"
 msgstr "Supprimer le réseau"
+
+#: client/assets/src/views/member.js
+msgid "client_views_member_years_old"
+msgstr "ans"
+
+#: client/assets/src/views/member.js
+msgid "client_views_member_gender_M"
+msgstr "Homme"
+
+#: client/assets/src/views/member.js
+msgid "client_views_member_gender_F"
+msgstr "Femme"
+
+#: client/assets/src/views/member.js
+msgid "client_views_member_gender_U"
+msgstr "Inconnu"
+
+#: client/assets/src/views/member.js
+msgid "client_views_member_ircop"
+msgstr "Opérateur du chat"
+
+#: client/assets/src/views/member.js
+msgid "client_views_member_away"
+msgstr "Absent"
 
 #: 
 msgid "client_applets_settings_notification_count_all_activity"
@@ -713,6 +803,20 @@ msgid "client_views_controlbox_message"
 msgstr "Envoyer un message..."
 
 #: 
+msgid "client_applets_chanlist_search"
+msgstr "Rechercher"
+
+#: 
+msgid "client_applets_chanlist_search_channels"
+msgstr "Rechercher des salons"
+
+#: 
+msgid "client_applets_chanlist_refresh"
+msgstr "Actualiser"
+
+#: 
+msgid "client_applets_chanlist_noresults"
+msgstr "Aucun résultat, merci de modifier votre recherche !"
 msgid "disconnect_from_server"
 msgstr "Vous allez être déconnecté du réseau IRC. Voulez-vous vraiment vous déconnecter ?"
 

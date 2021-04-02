@@ -1,0 +1,294 @@
+<!--
+ * Webfit plugin for KiwiIRC - http://www.webfit.fr - 07/2014
+ * Rework by Cory Chaplin <elephantman@europnet.org>
+
+    ToDo:
+        * "Nick/channel is temporarily unavailable" (freenode, same on others?) = nick locked.
+          Mark as locked and send release command before identify. release fails = wrong password
+        - Never dispose of the plugin as nickserv may send the messages at any point
+        - Move locales outside NickServIdentify
+        - Separate nickserv interface from the plugin model
+        - Remove the view/model tight coupling
+        - Rename NickServIdentify to NickServIdentify to allow for NickServRegister in future
+-->
+<style type="text/css">
+    #kiwi .nickserv_auth .warning {
+        color: #F00;
+        font-weight: bold;
+    }
+</style>
+
+<script>
+(function () {
+    var locales = {
+        'en': {
+            "nickserv_authbox" : {
+                "" : {
+                    "domain" : "nickserv_authbox",
+                    "lang" : "en"
+                },
+                "identification" : [ null, "Log In" ],
+                "registered_nick_identify" : [ null, "This nickname is registered, you must log in to use it." ],
+                "submit" : [ null, "Log in" ],
+                "bad_password" : [ null, "Incorrect password." ],
+                "password" : [ null, "Password" ]
+            }
+        },
+       'fr': {
+            "nickserv_authbox" : {
+                "" : {
+                    "domain" : "nickserv_authbox",
+                    "lang" : "fr"
+                },
+                "identification" : [ null, "Identification" ],
+                "registered_nick_identify" : [ null, "Ce pseudonyme est réservé, vous devez vous identifer pour le conserver." ],
+                "submit" : [ null, "Valider" ],
+                "bad_password" : [ null, "Mot de passe incorrect, veuillez le saisir à nouveau !" ],
+                "password" : [ null, "Mot de passe"]
+            }
+        }
+    };
+
+
+    /**
+     * Nickserv interface
+     * Extends Backbone.Events for subscribing to events
+     * Methods:
+     *     .message(message) - Send a PRIVMSG to nickserv
+     */
+    var nickserv = (function() {
+        var self = _.extend({}, Backbone.Events);
+
+        var network = kiwi.components.Network();
+        self.listenTo(network, 'message:notice', onNickServMessage);
+
+        var nickserv_nick = "NickServ";
+        var nickserv_matches = [
+            {
+                // Nick is registered
+                event_name: 'nick_is_registered',
+                matches: [
+                    /This nickname is registered/,
+                    /Le pseudo est enregistr/
+                ]
+            },
+            {
+                // Password correct
+                event_name: 'logged_in',
+                matches: [
+                    /you are now recognized/,
+                    /you are now identified/,
+                    /tes maintenant identifi/
+                ]
+            },
+            {
+                // Bad password
+                event_name: 'password_incorrect',
+                matches: [
+                    /Password incorrect/,
+                    /Mot de passe incorrect/
+                ]
+            },
+            {
+                // User logged out
+                event_name: 'logged_out',
+                matches: [
+                    /have been logged out/,
+                ]
+            },
+            {
+                // Nick changed
+                event_name: 'nick_changing',
+                matches: [
+                    /Your nickname is now being changed to/,
+                    /pseudo est maintenant chang/,
+                    /failed to identify in time/
+                ]
+            }
+        ];
+
+        self.message = sendMessage;
+        return self;
+
+
+        function onNickServMessage(event) {
+            if (event.type !== 'notice' || event.nick.toLowerCase() !== nickserv_nick.toLowerCase()) {
+                return;
+            }
+
+            // Go through the reges above and find one with a regex that matches
+            _.find(nickserv_matches, function(nickserv_match) {
+                var matched_regex = _.find(nickserv_match.matches, function(reg) {
+                    return reg.test(event.msg);
+                });
+
+                if (matched_regex) {
+                    // We have a matching message! Trigger the event and stop checking for more
+                    self.trigger(nickserv_match.event_name);
+                    return true;
+                }
+            });
+        }
+
+
+        function sendMessage(message) {
+            network.msg(nickserv_nick, message);
+        }
+    })();
+
+
+
+    var NickServIdentifyView = Backbone.View.extend({
+        events: {
+            'submit form': 'submitNickserv'
+        },
+        // Build the modal box
+        render: function() {
+            var that = this;
+
+            var translate = function(key, params) {
+                return that.model.locale.translate(key).fetch(params);
+            };
+
+            this.modalbox = this.modalbox || new kiwi.components.MenuBox(translate('identification'));
+            this.$el.html('<form class="nickserv_auth">\
+                            <div>\
+                                <p>' + translate('registered_nick_identify') + '</p>\
+                                <p class="warning"></p> \
+                                <input type="password" placeholder="' + translate('password') + '" class="nickserv_password">\
+                                <button class="nickserv_submit" class="btn btn-primary">' + translate('submit') + '</button>\
+                            </div>\
+                        </form>');
+
+            // Called when the menubox is manually closed
+            this.$el.dispose = function() {
+                delete that.modalbox;
+            };
+
+            this.modalbox.addItem(translate('identification'), this.$el);
+            return this;
+        },
+        warning: function(warning_text) {
+            this.$(".nickserv_auth .warning")
+                .html(warning_text)
+                .show();
+        },
+        showDialog: function() {
+            if(!this.model.incorrect_password && (this.model.nickserv_pass !== undefined && this.model.nickserv_pass.length > 3)) {
+                this.trigger('identify', {password: this.model.nickserv_pass});
+                return;
+            } else if (!this.modalbox || !this.$el.is(':visible')) {
+                this.render();
+            }
+
+            this.modalbox.show();
+            this.$('.nickserv_password').focus();
+            return this;
+        },
+        closeDialog: function() {
+            if(this.modalbox !== undefined) {
+                this.modalbox.dispose();
+                delete this.modalbox;
+                return this;
+            }
+        },
+        submitNickserv: function(event) {
+            event.preventDefault();
+            var password = this.$(".nickserv_password").val();
+            if (password != "") {
+                this.trigger('identify', {password: password});
+                this.model.nickserv_data.set('nickserv_pass', btoa(password));
+                this.model.nickserv_data.save();
+            } else {
+                this.$(".nickserv_password").focus();
+            }
+        }
+    });
+
+
+    var NickServIdentify = Backbone.Model.extend({
+        initialize: function () {
+            // Create a new JED instance
+            this.locale = new Jed({
+                "domain" : "nickserv_authbox",
+                "missing_key_callback" : function(key) {
+                    console.error('[Jed] missing_key_callback:' + key);
+                },
+                "locale_data" : locales[kiwi.i18n._textdomain] || locales['en']
+            });
+
+            // Load nickserv password from localStorage
+            this.nickserv_data = kiwi.components.DataStore.instance('kiwi.nickserv_data');
+            this.nickserv_data.load();
+            this.nickserv_pass = this.nickserv_data.get('nickserv_pass');
+            if(this.nickserv_pass != undefined && this.nickserv_pass.length > 3) {
+                this.nickserv_pass = atob(this.nickserv_pass);
+            } else {
+                this.nickserv_pass = undefined;
+            }
+
+            // By default, consider the password is correct
+            this.incorrect_password = false;
+
+            this.bindNickServEvents();
+
+            this.view = new NickServIdentifyView({model: this});
+            this.listenTo(this.view, 'identify', this.nickservIdentify);
+        },
+
+        bindNickServEvents: function() {
+            this.listenTo(nickserv, 'nick_is_registered', function() {
+                this.toggleModalBox('open');
+            });
+
+            this.listenTo(nickserv, 'logged_in', function() {
+                this.toggleModalBox('close');
+            });
+
+            this.listenTo(nickserv, 'password_incorrect', function() {
+                if(!this.incorrect_password && (this.nickserv_pass != undefined && this.nickserv_pass.length > 3)) {
+                    this.incorrect_password = true;
+                    this.toggleModalBox('open');
+                }
+                this.view.warning(this.locale.translate('bad_password').fetch());
+            });
+
+            this.listenTo(nickserv, 'nick_changing', function() {
+                this.toggleModalBox('close');
+            });
+        },
+
+        // This triggers the modal box toggle
+        toggleModalBox: function(new_state) {
+            var that = this;
+
+            // Already waiting? No need to start the timer again
+            if (this._tmr_toggle_modal_box) {
+                clearTimeout(this._tmr_toggle_modal_box);
+            }
+
+            // Wait 500ms in case other contradictory notices are coming, then toggle the modal box
+            this._tmr_toggle_modal_box = setTimeout(function() {
+                delete that._tmr_toggle_modal_box;
+                that.doToggleModalBox(new_state);
+            }, 500);
+        },
+        // This toggles the modal box
+        doToggleModalBox: function(state) {
+            if(state == 'open') {
+                this.view.showDialog(); // Create the modal
+            } else if(state == 'close') {
+                this.view.closeDialog(); // Close the modal
+            }
+        },
+        // This sends the nickserv identify command
+        nickservIdentify: function(params) {
+            nickserv.message('identify ' + params.password);
+        }
+    });
+
+
+    // Start the nickserv identify interface
+    new NickServIdentify();
+})();
+</script>

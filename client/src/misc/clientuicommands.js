@@ -86,6 +86,7 @@
             'unknown_command':     unknownCommand,
             'command':             allCommands,
             'command:msg':         {fn: msgCommand, description: translateText('command_description_msg')},
+            'command:amsg':        {fn: amsgCommand, description: translateText('command_description_amsg')},
             'command:action':      {fn: actionCommand, description: translateText('command_description_action'), aliases: ['me']},
             'command:join':        {fn: joinCommand, description: translateText('command_description_join'), aliases: ['j']},
             'command:part':        {fn: partCommand, description: translateText('command_description_part'), aliases: ['p']},
@@ -325,6 +326,20 @@
 
         panel.addMsg(this.app.connections.active_connection.get('nick'), styleText('privmsg', {text: message}), 'privmsg');
         this.app.connections.active_connection.gateway.msg(destination, message);
+    }
+
+
+    function amsgCommand (ev) {
+        var panels = this.app.connections.active_connection.panels,
+            message = ev.params.join(' ');
+
+        panels.forEach(_.bind(function(panel) {
+            // Send the message to all channels
+            if(panel.isChannel()) {
+                panel.addMsg(this.app.connections.active_connection.get('nick'), styleText('privmsg', {text: message}), 'privmsg');
+                this.app.connections.active_connection.gateway.msg(panel.get('name'), message);
+            }
+        }, this));
     }
 
 
@@ -710,7 +725,10 @@
             host: server,
             port: port,
             ssl: ssl,
-            password: password
+            password: password,
+            age: age,
+            gender: gender,
+            location: location
         }, function(err, new_connection) {
             var translated_err;
 

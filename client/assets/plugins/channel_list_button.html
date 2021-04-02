@@ -1,0 +1,29 @@
+<style type="text/css">
+</style>
+<script type="text/javascript">
+	// Add a channel list button in the toolbar
+	(function () {
+		var channelButtonAdded = false;
+
+	    var View = Backbone.View.extend({
+	        initialize: function (options) {
+				// Add channel list button
+				if(!channelButtonAdded) {
+					$(".main").prepend('<li id="chanlist"><button class="btn btn-primary"><i title="Liste des salons" class="fa fa-comments"></i><span class="button-text">&nbsp;Salons</span></button></li>');
+				}
+				
+				// Add the action on the button
+				$(document).on("click","#chanlist",function() {
+					if($('.applet .applet_chanlist .chanlist_name').length == 0) {
+						kiwi.components.Network().raw('LIST');
+					} else {
+						// If chanlist is already open, just switch to the applet
+						kiwi.components.Applet.loadOnce('kiwi_chanlist').view.show();
+					}
+				});
+			}
+		});
+		
+		new View();
+	})();
+</script>

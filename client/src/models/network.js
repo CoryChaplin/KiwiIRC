@@ -86,7 +86,10 @@
                     host:       this.get('address'),
                     port:       this.get('port'),
                     ssl:        this.get('ssl'),
-                    password:   this.get('password')
+                    password:   this.get('password'),
+                    age:        this.get('age'),
+                    gender:     this.get('gender'),
+                    location:   this.get('location')
                 };
 
             _kiwi.gateway.makeIrcConnection(server_info, function(err, connection_id) {
@@ -138,6 +141,10 @@
             this.gateway.on('topicsetby', onTopicSetBy, this);
             this.gateway.on('userlist', onUserlist, this);
             this.gateway.on('userlist_end', onUserlistEnd, this);
+            this.gateway.on('who_channel', onChannelWho, this);
+            this.gateway.on('who_channel_end', onChannelWhoEnd, this);
+            this.gateway.on('who_user', onUserWho, this);
+            this.gateway.on('who_user_end', onUserWhoEnd, this);
             this.gateway.on('banlist', onBanlist, this);
             this.gateway.on('mode', onMode, this);
             this.gateway.on('whois', onWhois, this);
@@ -663,6 +670,53 @@
 
 
 
+    function onChannelWho(event) {
+        var channel;
+        channel = this.panels.getByName(event.channel);
+        // If we didn't find a channel for this, may aswell leave
+        if (!channel) return;
+        
+        if(_kiwi.global.settings.get('rich_nicklist')) {
+            // Current channel member list
+            var members = channel.get('members');
+    
+            // Need to push user rich info into the members table
+            _.each(event.users, function(item) {
+                var user = members.getByNick(item.nick);
+    
+                // Use the rich userlist info
+                if(user) {
+                    user.richUserlist(item.flags, item.realname);
+                }
+            });
+        }
+    }
+
+
+
+    function onChannelWhoEnd(event) {
+        return;
+    }
+    
+
+    function onUserWho(event) {
+        var channel = this.panels.getByName(event.channel),
+            members, user;
+        
+        if(channel) {
+            members = channel.get('members');
+            user = members.getByNick(event.nick);
+        
+            user.richUserlist(event.flags, event.realname);
+        }
+    }
+
+
+    function onUserWhoEnd(event) {
+        return;
+    }
+    
+    
     function onBanlist(event) {
         var channel = this.panels.getByName(event.channel);
         if (!channel)
@@ -883,9 +937,17 @@
         case 'no_such_nick':
             tmp = this.panels.getByName(event.nick);
             if (tmp) {
-                tmp.addMsg(' ', styleText('no_such_nick', {nick: event.nick, text: event.reason, channel: event.channel}), 'status');
+                tmp.addMsg(' ', styleText('no_such_nick', {nick: event.nick, text: event.reason}), 'status');
             } else {
-                this.panels.server.addMsg(' ', styleText('no_such_nick', {nick: event.nick, text: event.reason, channel: event.channel}), 'status');
+                this.panels.server.addMsg(' ', styleText('no_such_nick', {nick: event.nick, text: event.reason}), 'status');
+            }
+            break;
+        case 'no_such_server':
+            tmp = this.panels.getByName(event.nick);
+            if (tmp) {
+                tmp.addMsg(' ', styleText('no_such_server', {server: event.server, text: event.reason}), 'status');
+            } else {
+                this.panels.server.addMsg(' ', styleText('no_such_server', {server: event.server, text: event.reason}), 'status');
             }
             break;
         case 'nickname_in_use':
@@ -899,6 +961,32 @@
                 (new _kiwi.view.NickChangeBox()).render();
             }
 
+            break;
+
+        case 'nickname_collision':
+            this.panels.server.addMsg(' ', styleText('nickname_alreadyinuse', {nick: event.nick, text: translateText('client_models_network_nickname_alreadyinuse', [event.nick]), channel: event.channel}), 'status');
+            if (this.panels.server !== this.panels.active) {
+                _kiwi.app.message.text(_kiwi.global.i18n.translate('client_models_network_nickname_alreadyinuse').fetch(event.nick));
+            }
+
+            // Only show the nickchange component if the controlbox is open
+            if (_kiwi.app.controlbox.$el.css('display') !== 'none') {
+                (new _kiwi.view.NickChangeBox()).render();
+            }
+
+            break;
+
+        case 'banned_nickname_change':
+            panel.addMsg(' ', styleText('channel_banned', {nick: event.nick, text: translateText('client_models_network_banned', [event.channel, event.reason]), channel: event.channel}), 'status');
+            _kiwi.app.message.text(_kiwi.global.i18n.translate('client_models_network_banned').fetch(event.channel, event.reason));
+
+            break;
+
+        case 'nick_change_too_fast':
+            this.panels.server.addMsg(' ', styleText('nick_change_too_fast', {nick: event.nick, text: translateText('client_models_network_nick_change_too_fast', [event.nick]), channel: event.channel}), 'status');
+            if (this.panels.server !== this.panels.active) {
+                _kiwi.app.message.text(_kiwi.global.i18n.translate('client_models_network_nick_change_too_fast').fetch(event.reason));
+            }
             break;
 
         case 'password_mismatch':

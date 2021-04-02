@@ -1,0 +1,128 @@
+<style>
+    #formatMenu {
+        position: absolute;
+        top: 1px;
+        right: 2px;
+        display: none;
+    }
+    #decreaseText,
+    #increaseText {
+        border: 1px solid #A1A1A0;
+        background-color: #dedede;
+        border-radius: 6px;
+        color: #A1A1A0;
+        cursor: pointer;
+        display: inline-block;
+        font-size: 1.3em;
+        margin: 1px;
+        padding: 0 4px 2px !important;
+        opacity: 0.5;
+    }
+    #decreaseText:hover,
+    #increaseText:hover {
+        opacity: 1;
+    }
+</style>
+<script>
+    var locale_strings,
+        locale,
+        network = kiwi.components.Network();
+
+
+    locale_strings = {
+        'en': {
+            "font_size" : {
+                "" : {
+                    "domain" : "font_size",
+                    "lang" : "en"
+                },
+                "reduce_text" : [ null, "Reduce text size" ],
+                "increase_text" : [ null, "Increase text size" ]
+            }
+        },
+        'it': {
+            "font_size" : {
+                "" : {
+                    "domain" : "font_size",
+                    "lang" : "it"
+                },
+                "reduce_text" : [ null, "Disminuir texto" ],
+                "increase_text" : [ null, "Aumentar texto" ]
+            }
+        },
+        'fr': {
+            "font_size" : {
+                "" : {
+                    "domain" : "font_size",
+                    "lang" : "fr"
+                },
+                "reduce_text" : [ null, "Réduire le texte" ],
+                "increase_text" : [ null, "Agrandir le texte" ]
+            }
+        }
+    }
+    // Create a new instance
+    locale = new Jed({
+        "domain" : "font_size",
+        "missing_key_callback" : function(key) {
+            console.error(key)
+        },
+        "locale_data" : locale_strings[kiwi.i18n._textdomain] || locale_strings['en']
+    });
+
+
+    network.on('connect', function (event) {
+        $('#formatMenu').show();
+    });
+
+    $("div.panels div.panel_container").prepend("<div id='formatMenu'><div id='decreaseText' title='" + 
+        locale.translate('reduce_text').fetch() + "'>A<sup>-</sup></div><div id='increaseText' title='" + 
+        locale.translate('increase_text').fetch() + "'>A<sup>+</sup></div></div>");
+
+
+    var values = [];
+
+    $("#decreaseText").click(function () {
+        var MsgFontSize = $(".messages").css("font-size");
+        var NickFontSize = $("#kiwi .messages .msg .nick").css("font-size");
+        if (MsgFontSize == null) MsgFontSize = 14;
+        if (NickFontSize == null) NickFontSize = "12px";
+        MsgFontSize = parseInt(MsgFontSize);
+        if (MsgFontSize > 14) {
+            MsgFontSize--;
+            $(".messages").css("font-size", MsgFontSize + "px");
+            NickFontSize = NickFontSize.substring(0, 2);
+            NickFontSize = parseInt(NickFontSize);
+            NickFontSize--;
+
+
+            $("#kiwi .messages .msg .nick").css("font-size", NickFontSize + "px");
+            values = [NickFontSize + "px", MsgFontSize + "px"];
+        }
+    });
+
+    $("#increaseText").click(function () {
+        var MsgFontSize = $(".messages").css("font-size");
+        var NickFontSize = $("#kiwi .messages .msg .nick").css("font-size");
+        if (MsgFontSize == null) MsgFontSize = 14;
+        if (NickFontSize == null) NickFontSize = "12px";
+        MsgFontSize = parseInt(MsgFontSize);
+        if (MsgFontSize < 20) {
+            MsgFontSize++;
+            $(".messages").css("font-size", MsgFontSize + "px");
+            NickFontSize = NickFontSize.substring(0, 2);
+            NickFontSize = parseInt(NickFontSize);
+            NickFontSize++;
+
+            $("#kiwi .messages .msg .nick").css("font-size", NickFontSize + "px");
+            values = [NickFontSize + "px", MsgFontSize + "px"];
+        }
+    });
+
+    kiwi.events.on('panel:active', function () {
+        if (values.length > 1) {
+            $(".messages").css("font-size", values[1]);
+            $("#kiwi .panel_container .messages .msg .nick").css("font-size", values[0]);
+        }
+    });
+</script>

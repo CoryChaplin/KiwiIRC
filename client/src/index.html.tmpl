@@ -20,9 +20,10 @@
             <div class="toolbar">
                 <div class="app_tools">
                     <ul class="main">
+                        <li class="tabs_menu"><i class="fa fa-bars" title="Tabs"></i><div class="tabs_activity"></div></li>
                         <li class="settings"><i class="fa fa-cogs" title="Settings"></i></li>
                         <li class="startup"><i class="fa fa-home" title="Home"></i></li>
-                        <li><a href="https://kiwiirc.com/" target="_blank"><img src="<%base_path%>/assets/img/ico.png" alt="KiwiIRC" title="KiwiIRC" /></a></li>
+                        <li><a href="http://www.europnet.org/" target="_blank"><img src="<%base_path%>/assets/img/ico.png" alt="EuropNet" title="EuropNet" /></a></li>
                     </ul>
                 </div>
 
@@ -33,6 +34,7 @@
                 </div>
 
                 <div class="status_message"></div>
+                <div class="toolbar_overlay"></div>
             </div>
 
             <div class="memberlists_resize_handle"></div>
@@ -145,12 +147,6 @@
     </script>
 
     <script type="text/html" id="tmpl_new_connection_info">
-        <div style="margin:1em 20px;">
-            <img src="<%base_path%>/assets/img/ico.png" alt="KiwiIRC Logo" title="Kiwi IRC" style="display:block; margin:0 auto;"/> <br />
-            <p style="font-style:italic;">A <strong>hand-crafted IRC client</strong> that you can enjoy. Designed to be used <strong>easily</strong> and <strong>freely</strong>.</p>
-
-            <p style="font-size:0.9em;margin-top:2em;">Peek at the <a href="https://www.kiwiirc.com/">Kiwi IRC homepage</a> for more information or to find out how to embed it on your own website. Looking for source code? Try the <a href="http://github.com/prawnsalad/KiwiIRC/">GitHub</a> page. This network of people may not be associated with Kiwi IRC itself.</p>
-        </div>
     </script>
 
     <script type="text/html" id="tmpl_server_select">
@@ -181,6 +177,28 @@
                             <tr class="pass">
                                 <td><label for="server_select_password"><%= password %></label></td>
                                 <td><input type="password" class="password" id="server_select_password"></td>
+                            </tr>
+
+                            <tr class="age">
+                                <td><label for="server_select_age"><%= age %></label></td>
+                                <td><input type="text" class="age" id="server_select_age"></td>
+                            </tr>
+
+                            <tr class="gender">
+                                <td><label for="server_select_gender"><%= gender %></label></td>
+                                <td>
+                                    <select  id="server_select_gender" class="gender">
+                                      <option value=""></option>
+                                      <option value="F"><%= gender_f %></option>
+                                      <option value="M"><%= gender_m %></option>
+                                      <option value="U"><%= gender_u %></option>
+                                    </select>
+                                </td>
+                            </tr>
+
+                            <tr class="location">
+                                <td><label for="server_select_location"><%= location %></label></td>
+                                <td><input type="text" class="location" id="server_select_location"></td>
                             </tr>
 
                             <tr class="channel">
@@ -234,8 +252,11 @@
                     </div>
                 </form>
 
+                <a class="kiwi_logo" href="http://www.europnet.org/" target="_blank">
+                    <h1><span>Service offert par EuropNet</span></h1>
+                </a>
                 <a class="kiwi_logo" href="https://kiwiirc.com/" target="_blank">
-                    <h1><span><%= powered_by %></span> <img src="<%base_path%>/assets/img/ico.png" alt="KiwiIRC Logo" title="Kiwi IRC" /></h1>
+                    <div style="width:340px;"><span><%= powered_by %></span> <img src="<%base_path%>/assets/img/ico.png" alt="KiwiIRC Logo" title="Kiwi IRC" /></div>
                 </a>
             </div>
         </div>
@@ -358,10 +379,6 @@
                                 <%= list %><small class="text-muted">(<%= large_amounts_of_chans %>)</small>
                             </label>
                         </div>
-                        <label>
-                            <input data-setting="scrollback" class="input-small" type="text" size="4" pattern="\d*">
-                            <span><%= scroll_history %></span>
-                        </label>
                     </div>
                 </section>
 
@@ -400,6 +417,18 @@
 
 
     <script type="text/html" id="tmpl_channel_list">
+        <form id="chanlist_search_form" method="POST">
+            <div class="applet_chanlist_search">
+                <label for="chan_search_text"><%= search_channels %></label>
+                <input type="text" id="chan_search_text" />
+                <button id="chan_search" type="submit">
+                    <span class="fa fa-search" style='padding-right: 10px;'></span><%= search %>
+                </button>
+                <button id="refresh_chans" type="submit">
+                    <span class="fa fa-refresh" style='padding-right: 10px;'></span><%= refresh %>
+                </button>
+            </div>
+        </form>
         <div class="applet_chanlist">
             <table>
                 <thead style="font-weight: bold;">

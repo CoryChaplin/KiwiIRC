@@ -1,0 +1,181 @@
+<!-- Plugin by Cory Chaplin (elephantman@europnet.org) - http://www.europnet.org - 07/2015 -->
+<script type="text/html" id="ignore_list_manager">
+<div id="applet_ignore_list_manager">
+  <table id="ignore_list_manager_table">
+    <thead style="font-weight: bold;">
+      <tr>
+        <td class="user_name_title"><a><%= users %></a></td>
+        <td class="date_title"><a><%= date %></a></td>
+        <td class="action_title"><a><%= action %></a></td>
+      </tr>
+    </thead>
+    <tbody style="vertical-align: top;" class="ignorelist_list">
+    </tbody>
+  </table>
+</div>
+</script>
+
+<style>
+#kiwi #ignore_list_manager_table {width: 100%;}
+#kiwi #applet_ignore_list_manager table {text-align: center;border-collapse: collapse;}
+#kiwi #applet_ignore_list_manager td.ignorelist_name {text-align: left;}
+#kiwi #applet_ignore_list_manager td {padding: 5px 10px; border: 0 solid #C4C4C4;}
+#kiwi #applet_ignore_list_manager td.ignorelist_name, #kiwi #applet_ignore_list_manager td.ignorelist_date {border-width: 0 1px 0 0;}
+#kiwi .btn-xs {
+	padding: 1px 5px;
+	font-size: 12px;
+	line-height: 1.5;
+	border-radius: 3px;
+}
+#kiwi #ignore_list_manager_table tr:nth-child(even) {
+    background: none repeat scroll 0 0 #DBDBDB;
+}
+</style>
+<script>
+kiwi.plugins.on('loaded', function() {
+    var locale_strings,
+        text;
+
+	$("#kiwi .app_tools .main").prepend('<li id="ignorelist"><button class="btn btn-primary"><i class="fa fa-ban" title="Liste des ignorés"></i><span class="button-text">&nbsp;Ignorés</span></button></li>');
+
+	$(document).on("click","#ignorelist", function() {
+		kiwi.components.Applet.loadOnce('applet_ignore_list_manager').view.show();		
+	});
+
+    locale_strings = {
+        'en': {
+            "ignore_list_manager" : {
+                "" : {
+                    "domain" : "ignore_list_manager",
+                    "lang" : "en"
+                },
+                "users" : [ null, "People" ],
+                "date" : [ null, "Date" ],
+                "action" : [ null, "Action" ],
+                "mask" : [ null, "Mask" ],
+                "remove" : [ null, "Remove from ignore list" ],
+                "ignore_list" : [ null, "Ignore list" ]
+            }
+        },
+
+       'fr': {
+            "ignore_list_manager" : {
+                "" : {
+                    "domain" : "ignore_list_manager",
+                    "lang" : "fr"
+                },
+                "users" : [ null, "Pseudos" ],
+                "date" : [ null, "Date" ],
+                "action" : [ null, "Action" ],
+                "mask" : [ null, "Masque" ],
+                "remove" : [ null, "Ne plus bloquer" ],
+                "ignore_list" : [ null, "Liste des ignorés" ]
+            }
+        }
+    };
+
+	(function () {
+        var view = Backbone.View.extend({
+            events: {
+            	'click .ignorelist_remove': 'removeIgnore'
+            },
+
+            initialize: function (options) {
+                var that = this,
+	                ignore_object = kiwi.connections.active_connection.ignore_list,
+					network_address = ignore_object.network_address;
+
+				this.ignore_list = ignore_object.ignore_data.get(network_address);
+				
+                this.$el = $(_.template($('#ignore_list_manager').html().trim())(this.model.text));
+
+                this.model.on('applet_loaded', function () {
+                    that.$el.parent().css('height', '100%');
+										
+					that.render();
+                });
+            },
+			
+			render : function() {
+				var table = $('table', this.$el),
+	                tbody = table.children('tbody:first').detach(),
+	                that = this;
+
+				// Go through each ignore and build the table line
+				if(this.ignore_list !== undefined) {
+					this.ignore_list.forEach(function(entry) {
+						var date = kiwi.utils.formatDate(new Date(entry.time)),
+							nickname,
+							separator_position,
+							row;
+
+						// If there is no nick, show the mask
+						separator_position = entry.mask.indexOf('!');
+						if(separator_position > 2) {
+							nickname = entry.mask.substring(0, separator_position);
+						} else {
+							nickname = entry.mask;
+						}
+
+		                tbody[0].appendChild(that.addIgnoreLine(nickname, date, entry.mask));
+					});					
+				}
+	            
+            	table[0].appendChild(tbody[0]);
+			},
+
+			addIgnoreLine: function(nickname, date, mask) {
+				var row;
+
+				row = document.createElement("tr");
+	            row.innerHTML = '<td class="ignorelist_name">' + nickname + '</td>\
+	            					<td class="ignorelist_date">' + date + '</td>\
+	            					<td class="ignorelist_action">\
+	            						<button class="btn btn-warning btn-xs ignorelist_remove" data-nn="' + mask + '">' + this.model.text['remove'] + '</button>\
+	            					</td>';
+
+	            return row;
+			},
+
+			removeIgnore: function(item) {
+				var mask = $(item.target).data('nn'),
+					network = kiwi.components.Network();
+                
+                network.unignoreMask(mask);
+                $(item.target).closest('td').parent()[0].remove();
+			}
+        });
+
+
+        var applet = Backbone.Model.extend({
+            initialize: function () {
+                var that = this;
+
+	            // Create a new JED instance
+	            this.locale = new Jed({
+	                "domain" : "ignore_list_manager",
+	                "missing_key_callback" : function(key) {
+	                    console.error('[Jed] missing_key_callback:' + key);
+	                },
+	                "locale_data" : locale_strings[kiwi.i18n._textdomain] || locale_strings['en']
+	            });
+
+	            // Set the locale strings
+	            this.text = {
+	                users: this.locale.translate('users').fetch(),
+	                date: this.locale.translate('date').fetch(),
+	                action: this.locale.translate('action').fetch(),
+	                mask: this.locale.translate('mask').fetch(),
+	                remove: this.locale.translate('remove').fetch(),
+	                ignore_list: this.locale.translate('ignore_list').fetch()
+	            };
+
+                this.set('title', this.text['ignore_list']);
+                this.view = new view({model: this});
+            }		
+        });
+
+        kiwi.components.Applet.register('applet_ignore_list_manager', applet);
+    })();
+});
+</script> 

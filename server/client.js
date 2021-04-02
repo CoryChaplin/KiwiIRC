@@ -145,6 +145,9 @@ Client.prototype.attachKiwiCommands = function() {
                 options.encoding = command.encoding;
 
             options.password = global.config.restrict_server_password || command.password;
+            options.age = command.age;
+            options.gender = command.gender;
+            options.location = command.location;
 
             that.state.connect(
                 (global.config.restrict_server || command.hostname),

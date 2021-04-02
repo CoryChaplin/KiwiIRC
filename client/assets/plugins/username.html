@@ -1,0 +1,57 @@
+<script>
+kiwi.plugins.on('loaded', function() {
+    var cookie;
+
+    // Cookie functions
+    function createCookie(name, value, days) {
+        if (days) {
+            var date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            var expires = "; expires=" + date.toGMTString();
+        }
+        else var expires = "";
+
+        document.cookie = name + "=" + value + expires + "; path=/";
+    }
+
+    function readCookie(name) {
+        var nameEQ = name + "=";
+        var ca = document.cookie.split(';');
+        for (var i = 0; i < ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+            if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+        }
+        return null;
+    }
+
+    function eraseCookie(name) {
+        createCookie(name, "", -1);
+    }
+
+    // End cookie functions
+
+    // var network = kiwi.components.Network();
+    //network.on('connect', function(event) {
+    cookie = readCookie('kiwi_username');
+
+
+    // Create and store the username
+    if (cookie == null) {
+        var prefixes = {'3': 'cf1-', '4': 'eu1-', '5': 'fa1-', '6': 'ad3-', '7': 'cf2-', '8': 'eu2-', '9': 'eu3-', '10': 'lo1-', '11': 'lo2-', '12': 'lo3-', '13': 'lo4-', '14': 'loo-', '15': 'mkc-'}, // list of EuropNet's source prefixes
+            origin = getQueryVariable('origine');
+
+        if(origin != '') {
+            prefix = prefixes[origin];
+        }
+
+        if(prefix === undefined) {
+            prefix = 'uk1-';
+        }
+        var username =  prefix + kiwi.utils.randomString(8);
+        // var value =  prefix + kiwi.connections.active.get('network').get('nick').substring(0, 8);
+        createCookie('kiwi_username', username, 30);
+    }
+    //});
+});
+</script>

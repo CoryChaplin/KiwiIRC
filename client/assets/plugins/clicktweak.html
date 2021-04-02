@@ -1,0 +1,28 @@
+<script>
+kiwi.plugins.on('loaded', function() {
+	var events = kiwi.events,
+		control = kiwi.components.ControlInput();
+
+	events.on('nick:select', function(event, data) {
+	    if(data.$event.type === 'dblclick') { // Open query on double click
+		    event.preventDefault();
+		    data.network.createQuery(data.member.get('nick'));
+	    } else if(data.$event.which === 1) { // Put the nick in controlbox when clicking on the nick in a channel
+		    if (data.source !== 'message') {
+		        return;
+		    }
+		    event.preventDefault();
+		    if(control.input.val() !== (data.member.get('nick') + ': ')){
+			    control.input.val(function(idx, val){
+			        return val + data.member.get('nick') + ': ';
+			    });
+		    }
+	    } else if (data.$event.which === 3) {
+	    	// Disable context menu on right click
+	    	data.$event.preventDefault();
+
+	    	return false;
+	    }
+	});
+});
+</script>

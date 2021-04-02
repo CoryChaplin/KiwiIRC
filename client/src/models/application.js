@@ -128,6 +128,7 @@
 
             _kiwi.global.panels = this.panels;
             _kiwi.global.panels.applets = this.applet_panels;
+            _kiwi.global.rightbar = this.rightbar;
 
             _kiwi.global.components.Applet = _kiwi.model.Applet;
             _kiwi.global.components.Panel =_kiwi.model.Panel;
@@ -183,7 +184,7 @@
             fn.bind('active', function (new_active_panel) {
                 var previous_panel = active_panel;
                 active_panel = new_active_panel;
-
+                
                 _kiwi.global.events.emit('panel:active', {previous: previous_panel, active: active_panel});
             });
 

@@ -1,0 +1,179 @@
+<style>
+	#emoticon-box {
+		width:auto;
+		background-color:#eeeeee;
+		display:none;
+	}
+	.emoticonoindividual {
+		margin:3px!important;
+		padding:4px!important;
+		position:relative;
+		top:1px;
+		display:inline-block;
+		border:solid 1px #A1A1A0;
+		-moz-border-radius: 6px;
+		-webkit-border-radius: 6px;
+		border-radius: 6px;
+		color: #A1A1A0;
+		font-size:1.3em;
+		cursor:pointer;
+	}
+	.emoticonoindividual .emoticon {
+		position:relative;
+		top:1px;
+		left:1px;
+	}
+
+</style>
+<script type="text/javascript">
+	var icon, control = kiwi.components.ControlInput();
+	icon = '<div id="emoticons"><i class="emoticon wink" id="emoticon-button"></i></div>';
+	control.addPluginIcon(icon);
+	$("div.controlbox").prepend("<div id='emoticon-box'></div>");
+	generar_iconos();
+	$("#emoticon-button").click(function () {
+		$('#emoticon-box').toggle("fast",function() {
+				var h = $(".controlbox").height();
+				$(".memberlists_resize_handle").css("bottom",h+"px");
+				$(".right_bar").css("bottom",h+"px");
+				$(".panels").css("bottom",h+"px");
+		});
+	});
+
+    $(".emoticonoindividual").click(function () {
+        var elem = $(this).attr('id').split('-');
+        var smiley = elem[1];
+        var emoticon;
+        switch (smiley) {
+	        case 'smile':
+	            emoticon = ':) ';
+	            break;
+	        case 'sad':
+	            emoticon = ':( ';
+	            break;
+	        case 'lion':
+	            emoticon = ':3 ';
+	            break;
+	        case 'winky_lion':
+	            emoticon = ';3 ';
+	            break;
+	        case 'confused':
+	            emoticon = ':S ';
+	            break;
+	        case 'cry':
+	            emoticon = ';( ';
+	            break;
+	        case 'wink':
+	            emoticon = ';) ';
+	            break;
+	        case 'wink_happy':
+	            emoticon = ';D ';
+	            break;
+	        case 'tongue':
+	            emoticon = ':P ';
+	            break;
+	        case 'cringe_tongue':
+	            emoticon = 'xP ';
+	            break;
+	        case 'shocked':
+	            emoticon = ':o ';
+	            break;
+	        case 'happy':
+	            emoticon = ':D ';
+	            break;
+	        case 'eyebrows':
+	            emoticon = '^^ ';
+	            break;
+	        case 'heart':
+	            emoticon = '<3 ';
+	            break;
+	        case 'doh':
+	            emoticon = '>_< ';
+	            break;
+	        case 'big_grin':
+	            emoticon = 'xD ';
+	            break;
+	        case 'wide_eye_right':
+	            emoticon = 'o.0 ';
+	            break;
+	        case 'wide_eye_left':
+	            emoticon = '0.o ';
+	            break;
+	        case 'unsure':
+	            emoticon = ':\\ ';
+	            break;
+        }
+        $("div.controlbox div.input_wrap textarea.inp").val($("div.controlbox div.input_wrap textarea.inp").val() + emoticon).focus();
+    	$("#emoticon-box").hide();
+    });
+
+
+
+	function generar_iconos() {
+		var i;
+		var emoticon;
+		for(i=0;i<19;i++) {
+			if(i==13 || i==14) continue; //mientras no haya fix.
+			switch(i) {
+				case 0:
+				emoticon = 'smile';
+				break;
+				case 1:
+				emoticon = 'sad';
+				break;
+				case 2:
+				emoticon = 'lion';
+				break;
+				case 3:
+				emoticon = 'winky_lion';
+				break;
+				case 4:
+				emoticon = 'confused';
+				break;
+				case 5:
+				emoticon = 'cry';
+				break;
+				case 6:
+				emoticon = 'wink';
+				break;
+				case 7:
+				emoticon = 'wink_happy';
+				break;
+				case 8:
+				emoticon = 'tongue';
+				break;
+				case 9:
+				emoticon = 'cringe_tongue';
+				break;
+				case 10:
+				emoticon = 'shocked';
+				break;
+				case 11:
+				emoticon = 'happy';
+				break;
+				case 12:
+				emoticon = 'eyebrows';
+				break;
+				case 13:
+				emoticon = 'heart';
+				break;
+				case 14:
+				emoticon = 'doh';
+				break;
+				case 15:
+				emoticon = 'big_grin';
+				break;
+				case 16:
+				emoticon = 'wide_eye_right';
+				break;
+				case 17:
+				emoticon = 'wide_eye_left';
+				break;
+				case 18:
+				emoticon = 'unsure';
+			}
+			var code = "<div id='smiley-" + emoticon + "' class='emoticonoindividual'><i class='emoticon " + emoticon + "'></div>";
+			$("#emoticon-box").append(code);
+		}
+	}
+</script>

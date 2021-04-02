@@ -1,0 +1,36 @@
+<script>
+	kiwi.plugins.on('loaded', function() {
+		// Catch the GET params. The URL must be formated like this :
+		// http://www.mykiwiirc.url:7778/?chatnow=1&nickname=azer&password=&channel=lybby&age=&sexe=U&location=
+		var channel = getQueryVariable('channel'),
+			default_channel = '#accueil',
+			password = getQueryVariable('nicksrv_pass'),
+			chatnow = getQueryVariable('chatnow');
+
+		
+		if(channel != undefined && channel != '') {
+			$('#server_select_channel').val('#'+channel);
+		} else {
+			$('#server_select_channel').val(default_channel);
+		}
+		if(password != '') $('#server_select_password').val(password);
+		
+		// If rich_nicklist is enabled, get the specific params
+		if (kiwi.settings.get('rich_nicklist') === true) {
+			var age = getQueryVariable('age'),
+				sexe = getQueryVariable('sexe'),
+				ville = getQueryVariable('ville');
+
+			if(age != '') $('#server_select_age').val(age);
+			if(sexe != '') $('#server_select_gender').val(sexe);
+			if(ville != '') $('#server_select_location').val(ville);
+		}
+		
+		if (chatnow == 1) {
+			// Hide login applet if in autoconnect mode
+			$('#kiwi .server_select').css('display', 'none');
+			// Simulate the login click
+			$('.server_details button').click();
+		}
+	});
+</script>

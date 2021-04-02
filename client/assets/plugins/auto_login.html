@@ -1,0 +1,28 @@
+<script>
+
+	// Catch the GET params. The URL must be formated like this :
+	// http://www.mykiwiirc.url:7778/?autoconnect=1&nick=azer&password=&channel=lybby&age=&gender=U&location=
+	var nick = getQueryVariable('nick'),
+		channel = getQueryVariable('channel'),
+		password = getQueryVariable('password'),
+		autoconnect = getQueryVariable('autoconnect');
+	
+	if(nick != '') $('#server_select_nick').val(nick);
+	if(channel != '' && channel != undefined) $('#server_select_channel').val('#'+channel);
+	if(password != '') $('#server_select_password').val(password);
+	
+	// If rich_nicklist is enabled, get the specific params
+	if (kiwi.settings.get('rich_nicklist') === true) {
+		var age = getQueryVariable('age'),
+			gender = getQueryVariable('gender'),
+			city = getQueryVariable('location');
+
+		if(age != '') $('#server_select_age').val(age);
+		if(gender != '') $('#server_select_gender').val(gender);
+		if(city != '') $('#server_select_location').val(city);
+	}
+	
+	if (autoconnect == 1) {
+		$('.server_details button').click();
+	}
+</script>

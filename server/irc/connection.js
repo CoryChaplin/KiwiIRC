@@ -76,6 +76,12 @@ var IrcConnection = function (hostname, port, ssl, nick, user, options, state, c
     this.gecos = ''; // Users real-name. Uses default from config if empty
     this.password = options.password || '';
     this.quit_message = ''; // Uses default from config if empty
+    
+    if (global.config.client.settings.rich_nicklist && global.config.client.settings.rich_nicklist_track_asl) {
+        this.age = options.age || '';
+        this.gender = options.gender || '';
+        this.location = options.location || '';
+    }
 
     // Set the passed encoding. or the default if none giving or it fails
     if (!options.encoding || !this.setEncoding(options.encoding)) {
@@ -745,6 +751,11 @@ var socketConnectHandler = function () {
     connect_data = findWebIrc.call(this, connect_data);
 
     global.modules.emit('irc authorize', connect_data).then(function ircAuthorizeCb() {
+        // Override gecos if in ASL mode
+        if (global.config.client.settings.rich_nicklist && global.config.client.settings.rich_nicklist_track_asl) {
+            that.gecos = that.age + ' ' + that.gender + ' ' + that.location;
+        }
+
         // Send any initial data for webirc/etc
         if (connect_data.prepend_data) {
             _.each(connect_data.prepend_data, function(data) {
@@ -763,7 +774,7 @@ var socketConnectHandler = function () {
 
         that.emit('connected');
     });
-};
+}
 
 
 

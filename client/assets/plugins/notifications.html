@@ -1,0 +1,110 @@
+<style>
+#kiwi .notification {
+	z-index: 1;
+	position:absolute;
+	top:3px; right:3px;
+	width: 300px;
+	max-width: 90%;
+
+
+	color: #DBDBDB;
+	text-shadow: 0 -1px black;
+	background: rgba(65, 65, 65, 0.95);
+	background-clip: padding-box;
+	border: 1px solid;
+	border-color: rgba(17, 17, 17, 0.6) rgba(17, 17, 17, 0.7) rgba(17, 17, 17, 0.9);
+	border-radius: 5px;
+
+	background-image: -webkit-linear-gradient(top, rgba(242, 242, 242, 0.3), rgba(221, 221, 221, 0.01) 50%, rgba(0, 0, 0, 0.12) 50%, rgba(0, 0, 0, 0.3));
+	background-image: -moz-linear-gradient(top, rgba(242, 242, 242, 0.3), rgba(221, 221, 221, 0.01) 50%, rgba(0, 0, 0, 0.12) 50%, rgba(0, 0, 0, 0.3));
+	background-image: -o-linear-gradient(top, rgba(242, 242, 242, 0.3), rgba(221, 221, 221, 0.01) 50%, rgba(0, 0, 0, 0.12) 50%, rgba(0, 0, 0, 0.3));
+	background-image: linear-gradient(to bottom, rgba(242, 242, 242, 0.3), rgba(221, 221, 221, 0.01) 50%, rgba(0, 0, 0, 0.12) 50%, rgba(0, 0, 0, 0.3));
+	-webkit-box-shadow: inset 0 0 1px rgba(255, 255, 255, 0.5), 0 1px 2px rgba(0, 0, 0, 0.3);
+	box-shadow: inset 0 0 1px rgba(255, 255, 255, 0.5), 0 1px 2px rgba(0, 0, 0, 0.3);
+
+
+}
+#kiwi .notification-inner { position:relative; padding:0 10px 10px 10px; }
+#kiwi .notification .close {
+	position:absolute;
+	top: -5px;
+	right: 8px;
+	margin: -10px;
+	font-size:16px;
+	cursor:pointer;
+	border:1px solid #1b1b1b;
+	border-radius: 100px 100px 100px 100px;
+	width: 20px;
+	line-height: 20px;
+	text-align: center;
+	color: #fff;
+	background-image: -webkit-linear-gradient(top, #383838, #111111);
+	background-image: -moz-linear-gradient(top, #383838, #111111);
+	background-image: -o-linear-gradient(top, #383838, #111111);
+	background-image: linear-gradient(to bottom, #383838, #111111);
+	-webkit-box-shadow: inset 0 1px rgba(255, 255, 255, 0.15);
+	box-shadow: inset 0 1px rgba(255, 255, 255, 0.15);
+}
+#kiwi .notification h6 {text-align: center;}
+#kiwi .notification .content {  }
+#kiwi .notification .content a { color:#98C2D0; }
+#kiwi .notification textarea { width: 100%; padding: 5px 7px; box-sizing: border-box; }
+</style>
+
+<script type="text/html" id="tmpl_notifications">
+	<div class="notification-inner">
+		<i class="fa fa-times close"></i>
+		<h6></h6>
+		<div class="content"></div>
+	</div>
+</script>
+
+<script type="text/javascript">
+	(function() {
+        var Notification = Backbone.View.extend({
+        	className: 'notification',
+
+        	events: {
+        		'click .close': 'closeNotification'
+        	},
+
+        	initialize: function(title, content) {
+        		this.title = title;
+        		this.content = content;
+        	},
+
+        	render: function() {
+        		this.$el.hide();
+        		this.$el.html($('#tmpl_notifications').html());
+        		this.$('h6').text(this.title);
+        		this.$('.content').html(this.content);
+        		return this;
+        	},
+
+        	closeNotification: function() {
+        		this.remove();
+        	}
+        });
+
+
+
+    	kiwi.events.on('loaded', function(event) {
+
+
+
+	    	var network = kiwi.components.Network();
+	    	network.on('connect', function() {
+	    		// Wait a few seconds so everything doesn't happen at once
+	    		setTimeout(function() {
+		        	var notif = new Notification('Nouvelle version du chat !', 'Nous préparons une toute nouvelle version de votre interface de chat avec énormément de nouveautés.<br />Vous pouvez la tester en avant première sur <a href="https://beta.europnet.org/" target="_blank">https://beta.europnet.org/</a>.<br /><br />Pour toute question ou remarque, retrouvez-nous sur le salon #beta<br /><br />Bon chat sur EuropNet !');
+		        	notif.render().$el.appendTo($('#kiwi'));
+		        	notif.$el.slideDown('fast');
+
+		        	// notif.closeNotification();
+	    		}, 3000);
+		    });
+
+		});
+
+    })();
+</script>

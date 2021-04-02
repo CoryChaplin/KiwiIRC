@@ -125,6 +125,11 @@ _kiwi.view.Channel = _kiwi.view.Panel.extend({
                     _kiwi.app.view.playSound('highlight');
                 }
 
+                // Tabbar highlight when in mobile view
+                if((msg.is_highlight || this.model.isQuery()) && !this.model.isActive() && _kiwi.app.view.$el.hasClass('narrow') === true && !_kiwi.app.view.$el.hasClass('with_sidebar')) {
+                    _kiwi.app.view.$el.find('.tabs_activity').show();
+                }
+
                 // Update the activity counters
                 (function () {
                     // Only inrement the counters if we're not the active panel
@@ -248,7 +253,7 @@ _kiwi.view.Channel = _kiwi.view.Panel.extend({
             extra_html = _kiwi.view.MediaMessage.buildHtml(url);
 
             // Make the link clickable
-            return '<a class="link_ext" target="_blank" rel="nofollow" href="' + url.replace(/"/g, '%22') + '">' + _.escape(nice) + '</a>' + extra_html;
+            return '<a class="link_ext" target="_blank" rel="noopener" href="' + url.replace(/"/g, '%22') + '">' + _.escape(nice) + '</a>' + extra_html;
         });
 
         return found_a_url ? parsed_url : false;

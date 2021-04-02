@@ -1,0 +1,81 @@
+<script type="text/javascript">
+var origin = getQueryVariable('origin'), 
+	theme = getQueryVariable('theme'), 
+	firstColor = getQueryVariable('firstColor'), 
+	secondColor = getQueryVariable('secondColor'), 
+	textColor = getQueryVariable('textColor'),
+	buttonColor = getQueryVariable('buttonColor'),
+	buttonTextColor = getQueryVariable('buttonTextColor');
+
+if(theme !== undefined) {
+	if(firstColor == undefined) firstColor = '';
+	if(secondColor == undefined) secondColor = '';
+	if(textColor == undefined) textColor = '';
+	if(buttonColor == undefined) buttonColor = '';
+	if(buttonTextColor == undefined) buttonTextColor = '';
+	
+
+	if(theme == 'relaxed') {
+		$('<style>'+
+		'#kiwi .toolbar {background: linear-gradient(#' + firstColor + ', #' + secondColor + ') repeat scroll 0 0 rgba(0, 0, 0, 0);}' +
+		'#kiwi .controlbox {background: linear-gradient(#' + secondColor + ', #' + firstColor + ') repeat scroll 0 0 rgba(0, 0, 0, 0);}' +
+		'#kiwi .memberlists ul li.mode.o .prefix {background: none repeat scroll 0 0 #' + firstColor + ';}' +
+		'#kiwi .memberlists ul li:hover {border-left: 5px solid #' + firstColor + ';}' +
+		'#kiwi .messages .msg.action .text {color: #' + firstColor + ';}' +
+		'#kiwi .toolbar .panellist li .activity {background: none repeat scroll 0 0 #' + firstColor + ';}' +
+		'#kiwi .toolbar .panellist li {border: 1px solid #' + firstColor + ';}' +
+		'#kiwi .toolbar .topic {background-color: #' + secondColor + ';}' +
+		'#kiwi button, #kiwi .toolbar .panellist {background-color: #' + buttonColor + ';color:#' + buttonTextColor +
+		';}</style>').appendTo('body');
+	} else if(theme == 'webfit' || theme == 'blue') {
+		$('<style>'+
+			'#kiwi .toolbar {background: linear-gradient(#' + firstColor + ', #' + secondColor + ') repeat scroll 0 0 rgba(0, 0, 0, 0);}' +
+			'#kiwi .controlbox {background: linear-gradient(#' + secondColor + ', #' + firstColor + ') repeat scroll 0 0 rgba(0, 0, 0, 0);}' +
+			'#kiwi .memberlists ul li.mode.o .prefix {background: none repeat scroll 0 0 #' + firstColor + ';}' +
+			'#kiwi .memberlists ul li:hover {border-left: 5px solid #' + firstColor + ';}' +
+			'#kiwi .messages .msg.action .text {color: #' + firstColor + ';}' +
+			'#kiwi .toolbar .panellist li .activity {background: none repeat scroll 0 0 #' + firstColor + ';color: #' + buttonTextColor + ';}' +
+			'#kiwi .toolbar .panellist li, #kiwi .btn-primary, #kiwi .btn-primary:active, #kiwi .btn-primary:target {border: 1px solid #' + buttonColor + ';background: none repeat scroll 0 0 #' + buttonColor + ';}' +
+			'#kiwi .toolbar .panellist li:hover, #kiwi .btn-primary:hover, #kiwi .toolbar .panellist li.active:hover {background: none repeat scroll 0 0 #' + firstColor + ';border: 1px solid #' + buttonColor + ';}' +
+			'#kiwi .toolbar .panellist li.active {border: 1px solid #' + secondColor + ';background: none repeat scroll 0 0 #' + secondColor + ';}' +
+			'#kiwi .toolbar .topic {background-color: #' + secondColor + ';}' +
+			'#kiwi .server_select button {background-color: #' + firstColor + ';}' +
+			'#kiwi .toolbar .panellist li.server:before {color: #' + buttonTextColor + ';}' + 
+			'#kiwi.narrow .tabs_activity {background-color: #' + firstColor + '; box-shadow: 0px 0px 5px 2px #' + firstColor + ';}' +
+			'#kiwi.chanlist_treeview .tabs ul li.active {background-color: #FD4B4B;border-color: #' + secondColor + ';}' +
+			'</style>').appendTo('body');
+	} else if(theme == 'mini') {
+		$('<style>' + 
+			'#kiwi .toolbar, #kiwi .controlbox {background-color: #' + firstColor + ';}' +
+			'#kiwi .toolbar .panellist {background-color: #' + buttonColor + ';color: #' + buttonTextColor + ';}' +
+			'#kiwi .toolbar .panellist .active {background-color: #' + secondColor + ';color: #' + buttonTextColor + ';border-top: 2px solid #FFF5AB;}' +
+			'#kiwi.connected .toolbar .panellist li.server:before {color: #' + buttonTextColor + ';}' +
+			'#kiwi .server_select button {background-color: #' + firstColor + ';color: #' + buttonTextColor + ';}' +
+			'#kiwi .server_select label {display: block;}' +
+			'</style>').appendTo('body');
+		$('#kiwi').addClass('narrow');
+
+		var net = kiwi.components.Network();
+	    net.on('connect', function() {
+	        setTimeout(function(){
+	        	kiwi.rightbar.toggle(true);
+	        }, 3000);
+	    });
+	}
+} /*else if($(window).width() < 700) {
+	if(kiwi.settings.get('theme') == 'webfit' || kiwi.settings.get('theme') == 'blue') {
+		kiwi.settings.set('theme', 'mini');
+
+		$('<style>' + 
+			'#kiwi .toolbar, #kiwi .controlbox {background-color: #3071a9;}' +
+			'#kiwi .toolbar .panellist {background-color: #3071a9;color: #FFFFFF;}' +
+			'#kiwi .toolbar .panellist .active {background-color: #31b0d5;color: #FFFFFF;border-top: 2px solid #FFFFFF;}' +
+			'#kiwi.connected .toolbar .panellist li.server:before {color: #FFFFFF;}' +
+			'#kiwi .server_select button {background-color: #3071a9;color: #FFFFFF;}' +
+			'#kiwi .server_select label {display: block;}' +
+			'#kiwi .toolbar .app_tools {display: none !important;}</style>').appendTo('body');
+	} else {
+		kiwi.settings.set('theme', 'mini');
+	}
+}*/
+</script>

@@ -1,0 +1,560 @@
+<!-- Plugin by Cory Chaplin (elephantman@europnet.org) - http://www.europnet.org - 07/2014 -->
+
+<style type="text/css">
+	#kiwi.theme_relaxed a.gender_male {
+	    color: #0066ff;
+	}
+	#kiwi.theme_relaxed a.gender_female {
+	    color: #ff00ff;
+	}
+	#kiwi.theme_relaxed a.gender_unknown {
+	    color: #000000;
+	}
+    #kiwi .applet .applet_userlist .fa-sort-asc:before, #kiwi .applet .applet_userlist .fa-sort-desc:before {
+        padding-left: 1em;
+    }
+    #kiwi .applet .applet_userlist td {
+        min-width: 120px;
+    }
+    #kiwi .applet_userlist {
+        margin: 0.5em 1em;
+    }
+    #kiwi .applet_userlist table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+    #kiwi .applet_userlist thead {
+        text-align: center;
+    }
+    #kiwi .applet_userlist tbody td {
+        border: 1px solid #C4C4C4;
+        padding: 0.3em 1em;
+    }
+    #kiwi .applet_userlist .userlist_nick, #kiwi .applet_userlist .userlist_age {
+        border-width: 0 1px 0 0;
+    }
+    #kiwi .applet_userlist .userlist_info {
+        border-width: 0;
+        width: 80%;
+    }
+    #kiwi .applet_userlist tr:nth-child(even) {
+        background: none repeat scroll 0 0 #DBDBDB;
+    }
+    #kiwi .applet_userlist_filters {
+        background: none repeat scroll 0 0 #DBDBDB;
+        border: 1px solid #C4C4C4;
+        border-radius: 5px;
+        margin: 15px;
+        padding: 0.5em;
+    }
+    #kiwi .applet_userlist_filters input, #kiwi .applet_userlist_filters button, #kiwi .applet_userlist_filters select {
+        margin: 0.5em 1em 0.5em 0;
+    }
+    #kiwi .applet_userlist_filters label {
+        margin-left: 0.5em;
+    }
+    #kiwi .applet_userlist_filters select {
+        padding: 5px;
+    }
+</style>
+
+<script type="text/html" id="tmpl_user_list">
+    <form id="userlist_filter_form" method="POST">
+        <div class="applet_userlist_filters">
+            <label for="filter_male"><%= male %></label>
+            <input type="checkbox" id="filter_male" checked="checked" />
+            <label for="filter_female"><%= female %></label>
+            <input type="checkbox" id="filter_female" checked="checked" />
+            <label for="filter_unknown"><%= unknown %></label>
+            <input type="checkbox" id="filter_unknown" checked="checked" />
+            <label for="filter_age"><%= age %></label>
+            <select id="filter_age">
+                <option value="all" selected="selected"><%= ageall %></option>
+                <option value="0-25"><%= age1 %></option>
+                <option value="24-45"><%= age2 %></option>
+                <option value="44-99"><%= age3 %></option>
+            </select>
+            <label for="filter_text"><%= search %></label>
+            <input type="text" id="filter_text" />
+            <button id="filter_users" type="submit">
+                <span class="fa fa-search" style='padding-right: 10px;'></span><%= go %>
+            </button>
+            <button id="refresh_users" type="submit">
+                <span class="fa fa-refresh" style='padding-right: 10px;'></span><%= refresh %>
+            </button>
+        </div>
+    </form>
+    <div class="applet_userlist">
+        <table class="userlist">
+            <thead style="font-weight: bold;">
+                <tr>
+                    <td><a class="userlist_nick"><%= nickname %></a></td>
+                    <td><a class="userlist_age"><%= age %></a></td>
+                    <td style="padding-left: 2em;"><a class="userlist_info"><%= location_infos %></a></td>
+                </tr>
+            </thead>
+            <tbody style="vertical-align: top;">
+            </tbody>
+        </table>
+    </div>
+</script>
+
+<script type="text/javascript">
+(function () {
+    // This plugin is only valid for rich_nicklist contexts
+    if(!kiwi.settings.get('rich_nicklist')) return;
+
+    // Add the userlist button
+    $(".main").prepend('<li id="userlist"><button class="btn btn-primary"><i title="Liste des chatteurs" class="fa fa-users"></i><span class="button-text">&nbsp;Chatteurs</span></button></li>');
+
+    // Add the action on the button, but only when nicklist is rich
+    var userlist_network = kiwi.components.Network();
+    userlist_network.on('connect', function() {
+        setTimeout(function(){
+            $(document).on("click","#userlist",function() {
+                kiwi.components.Applet.loadOnce('kiwi_userlist').view.show();
+            });
+        }, 2000);
+    });
+
+    
+    // Here goes the real job
+    var View = Backbone.View.extend({
+        events: {
+            "click .query": "openQuery",
+            "click .userlist_nick": "sortUsersByNickClick",
+            "click .userlist_age": "sortUsersByAgeClick",
+            "click .userlist_info": "sortUsersByInfoClick",
+            "click #filter_users": "filterUsersClick",
+            "click #refresh_users": "refreshUsersClick"
+        },
+
+
+        initialize: function (options) {
+            var locale_strings,
+                text;
+
+            locale_strings = {
+                'en': {
+                    "userlist" : {
+                        "" : {
+                            "domain" : "userlist",
+                            "lang" : "en"
+                        },
+                        "male" : [ null, "Male" ],
+                        "female" : [ null, "Female" ],
+                        "unknown" : [ null, "Unknown" ],
+                        "search" : [ null, "Search" ],
+                        "go" : [ null, "Search !" ],
+                        "refresh" : [ null, "Refresh" ],
+                        "nickname" : [ null, "Nickname" ],
+                        "age" : [ null, "Age" ],
+                        "location_infos" : [ null, "Location, info..." ],
+                        "userlist" : [ null, "Userlist" ],
+                        "no_results": [ null, "No results found, please try again !"],
+                        "ageall": [ null, "&nbsp;All ages&nbsp;"],
+                        "age1": [ null, "&nbsp;Less than 25 years old&nbsp;"],
+                        "age2": [ null, "&nbsp;25 à 45 years old&nbsp;"],
+                        "age3": [ null, "&nbsp;More than 45 years old&nbsp;"]
+                    }
+                },
+               'fr': {
+                    "userlist" : {
+                        "" : {
+                            "domain" : "userlist",
+                            "lang" : "fr"
+                        },
+                        "male" : [ null, "Homme" ],
+                        "female" : [ null, "Femme" ],
+                        "unknown" : [ null, "Autre" ],
+                        "search" : [ null, "Rechercher" ],
+                        "go" : [ null, "Rechercher !" ],
+                        "refresh" : [ null, "Actualiser" ],
+                        "nickname" : [ null, "Pseudo" ],
+                        "age" : [ null, "Age" ],
+                        "location_infos" : [ null, "Ville, infos..." ],
+                        "userlist" : [ null, "Liste des chatteurs" ],
+                        "no_results": [ null, "Pas de résultats pour votre recherche, merci de tenter à nouveau !"],
+                        "ageall": [ null, "&nbsp;Tous les âges&nbsp;"],
+                        "age1": [ null, "&nbsp;Moins de 25 ans&nbsp;"],
+                        "age2": [ null, "&nbsp;De 25 à 45 ans&nbsp;"],
+                        "age3": [ null, "&nbsp;Plus de 45 ans&nbsp;"]
+                    }
+                }
+            }
+
+            // Create a new JED instance
+            this.locale = new Jed({
+                "domain" : "userlist",
+                "missing_key_callback" : function(key) {
+                    console.error(key)
+                },
+                "locale_data" : locale_strings[kiwi.i18n._textdomain] || locale_strings['en']
+            });
+
+            // Set the locale strings
+            text = {
+                male: this.locale.translate('male').fetch(),
+                female: this.locale.translate('female').fetch(),
+                unknown: this.locale.translate('unknown').fetch(),
+                search: this.locale.translate('search').fetch(),
+                go: this.locale.translate('go').fetch(),
+                refresh: this.locale.translate('refresh').fetch(),
+                nickname: this.locale.translate('nickname').fetch(),
+                age: this.locale.translate('age').fetch(),
+                location_infos: this.locale.translate('location_infos').fetch(),
+                userlist: this.locale.translate('userlist').fetch(),
+                ageall: this.locale.translate('ageall').fetch(),
+                age1: this.locale.translate('age1').fetch(),
+                age2: this.locale.translate('age2').fetch(),
+                age3: this.locale.translate('age3').fetch()
+            };
+
+            // Push the html with the locale strings
+            this.$el = $(_.template($('#tmpl_user_list').html().trim())(text));
+
+            this.members = [];
+            // Waiting to add the table back into the DOM?
+            this.waiting = false;
+
+            // Sort the table
+            this.order = 'nick_asc';
+            this.filter_users = ['M', 'F', 'U'];
+        },
+
+        render: function () {
+            var table = $('table.userlist', this.$el),
+                tbody = table.children('tbody:first').detach(),
+                that = this,
+                i;
+
+           // Create the sort icon container and clean previous any previous ones
+            if($('.applet_userlist .userlist_nick').find('span.userlist_sort_nick').length == 0) {
+                this.$('.userlist_nick').append('<span class="userlist_sort_nick">&nbsp;&nbsp;</span>');
+            } else {
+                this.$('.userlist_nick span.userlist_sort_nick').removeClass('fa fa-sort-desc');
+                this.$('.userlist_nick span.userlist_sort_nick').removeClass('fa fa-sort-asc');
+            }
+            if ($('.applet_userlist .userlist_age').find('span.userlist_sort_age').length == 0) {
+                this.$('.userlist_age').append('<span class="userlist_sort_age">&nbsp;&nbsp;</span>');
+            } else {
+                this.$('.userlist_age span.userlist_sort_age').removeClass('fa fa-sort-desc');
+                this.$('.userlist_age span.userlist_sort_age').removeClass('fa fa-sort-asc');
+            }
+            if ($('.applet_userlist .userlist_info').find('span.userlist_sort_info').length == 0) {
+                this.$('.userlist_info').append('<span class="userlist_sort_info">&nbsp;&nbsp;</span>');
+            } else {
+                this.$('.userlist_info span.userlist_sort_info').removeClass('fa fa-sort-desc');
+                this.$('.userlist_info span.userlist_sort_info').removeClass('fa fa-sort-asc');
+            }
+
+            // Push the new sort icon
+            switch (this.order) {
+                case 'user_desc':
+                default:
+                    this.$('.userlist_nick span.userlist_sort_nick').addClass('fa fa-sort-asc');
+                    break;
+                case 'user_asc':
+                    this.$('.userlist_nick span.userlist_sort_nick').addClass('fa fa-sort-desc');
+                    break;
+                case 'age_asc':
+                    this.$('.userlist_age span.userlist_sort_age').addClass('fa fa-sort-asc');
+                    break;
+                case 'age_desc':
+                    this.$('.userlist_age span.userlist_sort_age').addClass('fa fa-sort-desc');
+                    break;
+                case 'info_asc':
+                    this.$('.userlist_info span.userlist_sort_info').addClass('fa fa-sort-asc');
+                    break;
+                case 'info_desc':
+                    this.$('.userlist_info span.userlist_sort_info').addClass('fa fa-sort-desc');
+                    break;
+            }
+
+            that.members = this.sortUsers(this.members, this.order);
+            that.members = this.filterUsers(this.members, this.filter_users);
+
+            // Make sure all the user DOM nodes are inserted in order
+            for (i = 0; i < that.members.length; i++) {
+                tbody[0].appendChild(that.members[i].dom);
+            }
+
+            table[0].appendChild(tbody[0]);
+        },
+
+        openQuery: function(event) {
+            if (event.target) {
+		        kiwi.connections.active_connection.createQuery($(event.target).data('member'));
+            } else {
+                // IE...
+                kiwi.connections.active_connection.createQuery($(event.srcElement).data('member'));
+            }
+        },
+
+        sortUsersByNickClick: function (event) {
+            // Revert the sorting to switch between orders
+            this.order = (this.order == 'nick_asc') ? 'nick_desc' : 'nick_asc';
+
+            this.sortUsersClick();
+        },
+
+        sortUsersByAgeClick: function (event) {
+            // Revert the sorting to switch between orders
+            this.order = (this.order == 'age_asc' || this.order == '') ? 'age_desc' : 'age_asc';
+
+            this.sortUsersClick();
+        },
+
+        sortUsersByInfoClick: function (event) {
+            // Revert the sorting to switch between orders
+            this.order = (this.order == 'info_asc' || this.order == '') ? 'info_desc' : 'info_asc';
+
+            this.sortUsersClick();
+        },
+
+        sortUsersClick: function() {
+            this.render();
+        },
+
+        sortUsers: function (users, order) {
+            var sort_users = [],
+                new_users = [];
+
+
+            // First we create a light copy of the users object to do the sorting
+            _.each(users, function (user, user_idx) {
+                sort_users.push({'user_idx': user_idx, 'age': user.get('age'), 'nick': user.get('nick'), 'info': user.get('info')});
+            });
+
+            // Second, we apply the sorting
+            sort_users.sort(function (a, b) {
+                switch (order) {
+                    case 'age_asc':
+                        return a.age - b.age;
+                    case 'age_desc':
+                        return b.age - a.age;
+                    case 'nick_asc':
+                        if (a.nick.toLowerCase() > b.nick.toLowerCase()) return 1;
+                        if (a.nick.toLowerCase() < b.nick.toLowerCase()) return -1;
+                    case 'nick_desc':
+                        if (a.nick.toLowerCase() < b.nick.toLowerCase()) return 1;
+                        if (a.nick.toLowerCase() > b.nick.toLowerCase()) return -1;
+                    case 'info_asc':
+                        if (a.info.toLowerCase() > b.info.toLowerCase()) return 1;
+                        if (a.info.toLowerCase() < b.info.toLowerCase()) return -1;
+                    case 'info_desc':
+                        if (a.info.toLowerCase() < b.info.toLowerCase()) return 1;
+                        if (a.info.toLowerCase() > b.info.toLowerCase()) return -1;
+                    default:
+                        return b.nick - a.nick;
+                }
+                return 0;
+            });
+
+            // Third, we re-shuffle the chanlist according to the sort order
+            _.each(sort_users, function (user) {
+                new_users.push(users[user.user_idx]);
+            });
+
+            return new_users;
+        },
+
+        filterUsersClick: function (event) {
+            event.preventDefault();
+
+            var gender_filter = [],
+                table = $('table.userlist', this.$el),
+                tbody,
+                that = this;
+
+            if($('#userlist_filter_form input#filter_male').is(':checked')) gender_filter.push('M');
+            if($('#userlist_filter_form input#filter_female').is(':checked')) gender_filter.push('F');
+            if($('#userlist_filter_form input#filter_unknown').is(':checked')) gender_filter.push('U');
+
+            this.filter_age = $('#userlist_filter_form #filter_age').val();
+            
+            this.filter_users = gender_filter;
+            this.text_filter = $('#userlist_filter_form input#filter_text')[0].value;
+
+            var new_users = this.filterUsers(that.members);
+
+            // Make sure all the user DOM nodes are inserted in order
+            $('table.userlist tbody:first').remove();
+            $('table.userlist').append('<tbody style="vertical-align: top;"></tbody>');
+            tbody = table.children('tbody:first').detach();
+
+            for (i = 0; i < new_users.length; i++) {
+                tbody[0].appendChild(new_users[i].dom);
+            }
+            
+            // If there is no users, print an info message
+            if(new_users.length == 0) {
+                var row = document.createElement("tr");
+                row.innerHTML = '<td colspan="3">' + this.locale.translate('no_results').fetch() + '</td>';
+                tbody[0].appendChild(row);
+            }
+
+            table[0].appendChild(tbody[0]);
+        },
+
+        filterUsers: function(users) {
+            var new_users = [],
+                filter_users = this.filter_users,
+                text_filter = new RegExp(this.text_filter, 'gi'),
+                filter_age
+                filters = 'gender';
+
+            // Determine what criterion we want to use to filter
+            if(this.filter_age !== undefined && this.filter_age !== 'all') {
+                filter_age = this.filter_age.split('-');
+                filters += '_age';
+            }
+            if(this.text_filter !== undefined && this.text_filter !== '') {
+                filter_age = this.filter_age.split('-');
+                filters += '_text';
+            }
+
+            // Filter the users
+            _.each(users, function (user) {
+                var match = false;
+
+                switch(filters) {
+                    case 'gender':
+                    default:
+                        if(_.contains(filter_users, user.get('gender'))) {
+                            match = true;
+                        }
+                        break;
+
+                    case 'gender_age':
+                        if(_.contains(filter_users, user.get('gender')) && 
+                        (user.get('age') !== undefined && user.get('age') != '' && (user.get('age') > filter_age[0]) && (user.get('age') < filter_age[1]))) {
+                            match = true;
+                        }
+                        break;
+
+                    case 'gender_text':
+                        if(_.contains(filter_users, user.get('gender'))) {
+                            // Specific tests for text filters to minimize the workload
+                            if(text_filter.test(user.get('nick'))) {
+                                match = true;
+                            } else if (text_filter.test(user.get('info'))) {
+                                match = true;
+                            }
+                        }
+                        break;
+
+                    case 'gender_age_text':
+                        if(_.contains(filter_users, user.get('gender')) && 
+                            (user.get('age') !== undefined && user.get('age') != '' && (user.get('age') > filter_age[0]) && (user.get('age') < filter_age[1]))) {
+                            // Specific tests for text filters to minimize the workload
+                            if(text_filter.test(user.get('nick'))){
+                                match = true;
+                            } else if (text_filter.test(user.get('info'))) {
+                                match = true;
+                            }
+                        }
+                        break;
+                }
+
+                if(match) new_users.push(user);
+            });
+            
+            return new_users;
+        },
+
+        refreshUsersClick: function(event) {
+            event.preventDefault();
+
+            $('li.active .part').click();
+            kiwi.components.Applet.load('kiwi_userlist');
+            kiwi.components.Applet.loadOnce('kiwi_userlist').view.show();
+        }
+    });
+
+
+
+    var Applet = Backbone.Model.extend({
+        initialize: function () {
+            this.view = new View();
+            this.set('title', this.view.locale.translate('userlist').fetch());
+
+            this.onListUsers ();
+        },
+
+        onListUsers: function () {
+			var panels = kiwi.connections.panels(),
+				members = [],
+                member_nicks = [],
+				userlist_info = [];
+
+			// Catch the member lists for all open channels
+			_.each(panels, function(panel) {
+				if(panel.get('members') !== undefined) {
+					_.each(panel.get('members').models, function(member) {
+                        // Dont duplicate members
+                        if(!_.contains(member_nicks, member.get('nick'))) {
+                            // Fill the list
+                            members.push(member);
+                            member_nicks.push(member.get('nick'));
+                        }
+					});
+                }
+			});
+
+			this.addMember(members);
+        },
+
+        addMember: function(members) {
+            var that = this;
+
+            if (!_.isArray(members)) {
+                members = [members];
+            }
+            _.each(members, function (member) {
+                var row;
+                row = document.createElement("tr");
+
+                var gender_style;
+                switch(member.get('gender')) {
+                	case 'U':
+                	default:
+                		gender_style = 'gender_unknown';
+                		break;
+                	case 'M':
+                		gender_style = 'gender_male';
+                		break;
+                	case 'F':
+                		gender_style = 'gender_female';
+                		break;
+                }
+                row.innerHTML = '<td class="userlist_nick"><a class="member query ' + gender_style +'" data-member="' + 			member.get('nick') +'">' + member.get('nick') + '</a></td>' +
+                				'<td class="userlist_age" style="text-align: center;">' + member.get('age') + '</td>' +
+                				'<td style="padding-left: 2em;" class="userlist_info">' + member.get('info') + '</td>';
+                member.dom = row;
+                
+                that.view.members.push(member);
+            });
+
+            if (!that.view.waiting) {
+                that.view.waiting = true;
+                _.defer(function () {
+                    that.view.render();
+                    that.view.waiting = false;
+                });
+            }
+        },
+
+        dispose: function () {
+            this.view.users = null;
+            this.view.unbind();
+            this.view.$el.html('');
+            this.view.remove();
+            this.view = null;
+        }
+    });
+
+
+
+    kiwi.components.Applet.register('kiwi_userlist', Applet);
+})();

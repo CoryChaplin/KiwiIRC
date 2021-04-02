@@ -1,0 +1,283 @@
+<!-- Plugin by Cory Chaplin (elephantman@europnet.org) - http://www.europnet.org - 09/2015 -->
+<script type="text/html" id="tmpl_navbar">
+    <div class="navbar" id="navbar">
+        <a class="logo" href="<%= logo_link %>" target="_blank">
+            <img src="/assets/plugins/images/<%= logo_file %>" height="50" alt="<%= logo_title %>" title=="<%= logo_title %>">
+        </a>
+        <div class="nav">
+            <ul>
+                <li>
+                    <a href="http://www.chat-fr.org/photos" target="_blank" title="Photos chatteurs" onclick="javascript:ga('send', 'event', 'Menu', 'Photos');">
+                        <i class="fa fa-camera" title="Photos chatteurs"></i>Photos chatteurs
+                    </a>
+                </li>
+                <li>
+                    <a href="http://www.chat-fr.org/rencontre" target="_blank" title="Annuaire chatteurs" onclick="javascript:ga('send', 'event', 'Menu', 'Annuaire');">
+                        <i class="fa fa-book" title="Annuaire chatteurs"></i>Annuaire chatteurs
+                    </a>
+                </li>
+                <li>
+                    <a href="http://www.chat-fr.org/register" target="_blank" title="Crééz votre fiche" onclick="javascript:ga('send', 'event', 'Menu', 'Inscription');">
+                        <i class="fa fa-user" title="Crééz votre fiche"></i>Crééz votre fiche
+                    </a>
+                </li>
+                <li>
+                    <a href="http://quote.europnet.org" target="_blank" title="Quotes" onclick="javascript:ga('send', 'event', 'Menu', 'Quotes');">
+                        <i class="fa fa-quote-right" title="Quotes"></i>Quotes
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="social">
+            <div id="fb-root"></div>
+            <div class="fb-like" data-href="<%= facebook_url %>" data-send="false" data-layout="button_count" data-width="140" data-show-faces="false" data-action="recommend"></div>
+        </div>
+    </div>
+</script>
+
+
+<style>
+    #navbar {
+        margin: 0;
+        padding-left: 0;
+        padding-right: 0;
+        border-width: 0;
+        border-radius: 0;
+        -webkit-box-shadow: none;
+        box-shadow: none;
+        min-height: 50px;
+        background: #3071a9;
+    }
+    #navbar .logo {
+        height: 50px;
+        position: relative;
+        display: block;
+        width: 150px;
+        float: left;
+        margin-left: 10px;
+    }
+    #navbar .nav ul {
+        display: block;
+        float: left;
+        list-style: outside none none;
+        font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+        color: rgb(255, 255, 255);
+        line-height: 1.42857;
+        font-size: 14px;
+    }
+    #navbar .nav li {
+        display: block;
+        float: left;
+        position: relative;
+    }
+    #navbar .nav li a {
+        text-decoration: none;
+        color: #FFF;
+        padding: 0.2em 0.5em;
+        font-size: 1em;
+        margin: 11px 7px;
+        display: inline-block;
+        background: #428BCA none repeat scroll 0% 0%;
+        color: #FFF;
+        font-weight: normal;
+        line-height: 1.42857;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
+        cursor: pointer;
+        -moz-user-select: none;
+        border: 1px solid transparent;
+        border-radius: 4px;
+    }
+    #navbar .nav li a i {
+        padding-right: 0.5em;
+    }
+    #navbar .nav li a:hover {
+        background-color: #3071a9;
+        border-color: #428BCA;
+    }
+    #navbar .social {
+        float: right;
+        width: 180px;
+        padding: 15px 10px 0 0;
+        margin-right: 20px;
+    }
+    #navbar .fb-like {
+        float: right;
+        padding-bottom: 4px;
+        padding-right: 10px;
+        z-index: 2;
+    }
+    #kiwi {clear: both;}
+    #kiwi-narrow #nav-bar .nav, #kiwi-narrow #ad_button {
+        display: none;
+    }
+    #kiwi #ad_button {
+        background-color: #FFFFFF;
+        color: #3071A9;
+        border-color: #FFF;
+    }
+</style>
+
+<script>
+kiwi.plugins.on('loaded', function() {
+    var locale_strings,
+        text,
+        locale;
+
+
+    locale_strings = {
+        'en': {
+            "navbar" : {
+                "" : {
+                    "domain" : "navbar",
+                    "lang" : "en"
+                },
+                "play" : [ null, "Play" ],
+                "stop" : [ null, "Stop" ],
+                "mute" : [ null, "Mute" ],
+                "unmute" : [ null, "Unmute" ]
+            }
+        },
+
+       'fr': {
+            "navbar" : {
+                "" : {
+                    "domain" : "navbar",
+                    "lang" : "fr"
+                },
+                "play" : [ null, "Lecture" ],
+                "stop" : [ null, "Stop" ],
+                "mute" : [ null, "Muet" ],
+                "unmute" : [ null, "Son" ]
+            }
+        }
+    };
+    
+
+	(function () {
+        var Navbar = Backbone.View.extend({
+            initialize: function (options) {
+                var origin = getQueryVariable('origine');
+
+                // Create a new JED instance
+                this.locale = new Jed({
+                    "domain" : "navbar",
+                    "missing_key_callback" : function(key) {
+                        console.error('[Jed] missing_key_callback:' + key);
+                    },
+                    "locale_data" : locale_strings[kiwi.i18n._textdomain] || locale_strings['en']
+                });
+
+                this.text = {
+                    play: this.locale.translate('play').fetch(),
+                    stop: this.locale.translate('stop').fetch(),
+                    mute: this.locale.translate('mute').fetch(),
+                    unmute: this.locale.translate('unmute').fetch()
+                };
+
+                if(origin == 3 || origin == 7) {
+                    this.text['logo_link'] = 'http://www.chat-fr.org/';
+                    this.text['logo_file'] = 'logo-cfr.png';
+                    this.text['logo_title'] = 'Chat-fr';
+                    this.text['facebook_url'] = 'https://www.facebook.com/EuropNet/160252764002584';
+
+                } else {
+                    this.text['logo_link'] = 'http://www.europnet.org/';
+                    this.text['logo_file'] = 'logo-en-white.png';
+                    this.text['logo_title'] = 'EuropNet';
+                    this.text['facebook_url'] = 'https://www.facebook.com/EuropNet/160252764002584';
+                }
+            },
+
+            render: function() {
+                this.$el = $(_.template($('#tmpl_navbar').html())(this.text));
+                return this;
+            },
+
+            calculateKiwiHeight: function(bar_height) {
+                return $(window).height() - bar_height;
+            },
+
+            adButton: function() {
+                // If we're a man 22 or more, we're in the category
+                if(kiwi.connections.active_connection.get('gender') === 'M' && 
+                    kiwi.connections.active_connection.get('age') > 22 &&
+                    $('#ad_button').length == 0) {
+
+                    // After 5 minutes, run through the panels
+                    setTimeout(function() {
+                        var panels = kiwi.connections.active_connection.panels;
+                        this.ad_category = 'casual';
+                        this.query_counter = 0;
+
+                        // Roll through panels to find category to put the user in
+                        panels.forEach(_.bind(function(panel) {
+                            if(panel.isChannel()) {
+                                if(panel.get('name') === '#rencontres' && this.ad_category === 'casual') { // Dating
+                                    this.ad_category = 'dating';
+                                } else if(panel.get('name') === '#sexe' && this.ad_category != 'sex') { // Sex
+                                    this.ad_category = 'sex';
+                                }
+                            } else if(panel.isQuery()) {
+                                this.query_counter++;
+                            }
+                        }, this));
+
+                        // Choose and trigger the button
+                        if(this.query_counter > 1 && this.ad_category != undefined && this.ad_category != '' && $('#ad_button').length == 0) {
+                            if(this.ad_category === 'sex') {
+                                ga('send', 'event', 'Ad', 'Display sex');
+                                //disable 08072016 $('#navbar .nav ul').append('<li id="ad_button"><a href="http://www.espace-plus.net/redir/rotation_redir.php?id_rotation=398&synergie=hetero&id=76334&langue=fr&w=0&e=1" target="_blank" title="Webcam X live" onclick="javascript:ga(\'send\', \'event\', \'Ad\', \'Click sex\');"><i class="fa fa-video-camera" title="Webcam X live" style="color: rgb(253, 93, 238);"></i>Webcam X live</a></li>');
+                           	$('#navbar .nav ul').append('<li id="ad_button"><a href="http://www.x-flirt.co/pdv/r/27267/20daca90fc85dc933c359d2c44f5ab47|1e5ae181c90ae83f1377543de9e90242/?comfrom=838942&cf0=pc&cf2=applet&cfsa2=sex" target="_blank" title="Plan cul direct !" onclick="javascript:ga(\'send\', \'event\', \'Ad\', \'Click sex\');"><i class="fa fa-heart" title="Plan cul direct !" style="color: rgb(253, 93, 238);"></i>Plan cul direct !</a></li>'); 
+			    } else if(this.ad_category === 'dating') {
+                                ga('send', 'event', 'Ad', 'Display dating');
+                                //disable 08072016 $('#navbar .nav ul').append('<li id="ad_button"><a href="http://www.espace-plus.net/redir/rotation_redir.php?id_rotation=400&synergie=hetero&id=76334&langue=fr&w=0&e=1" target="_blank" title="Rencontres coquines" onclick="javascript:ga(\'send\', \'event\', \'Ad\', \'Click dating\');"><i class="fa fa-heart" title="Rencontres coquines" style="color: rgb(253, 93, 238);"></i>Rencontres coquines</a></li>');
+				$('#navbar .nav ul').append('<li id="ad_button"><a href="http://www.x-flirt.co/pdv/r/27267/03f083f2b8b2c6ee95b370b4f37173cc|1659dd247e16412cf9e57d15a02e2505/?comfrom=838942&cf0=pc&cf2=applet&cfsa2=coquin" target="_blank" title="Rencontres coquines" onclick="javascript:ga(\'send\', \'event\', \'Ad\', \'Click dating\');"><i class="fa fa-heart" title="Rencontres coquines" style="color: rgb(253, 93, 238);"></i>Rencontres coquines</a></li>');
+                            } else if(this.ad_category === 'casual') {
+                                ga('send', 'event', 'Ad', 'Display casual');
+                                $('#navbar .nav ul').append('<li id="ad_button"><a href="http://www.edenflirt.co/pdv/r/27267/f30c7b3a59238a42b2567bfa5a43c92e/?comfrom=838942&cf0=pc&cf2=bouton_chat&cfsa2=" target="_blank" title="Flirt rapide" onclick="javascript:ga(\'send\', \'event\', \'Ad\', \'Click casual\');"><i class="fa fa-heart" title="Flirt rapide" style="color: rgb(253, 93, 238);"></i>Flirt rapide</a></li>');
+                            }
+                        }
+                    }, 300000);
+                }
+            }
+        });
+
+        var nav = new Navbar(),
+            nav_dom,
+            kiwi_height;
+
+        nav_dom = nav.render().$el;
+        $('#kiwi').before(nav_dom);
+        //nav.render().$el.prependTo($('#kiwi'));
+
+
+        // Adjust kiwi size on load
+        $('#kiwi').height(nav.calculateKiwiHeight(nav_dom.height()));
+        // Adjust kiwi size on window resize
+        $(window).resize(function() {
+            if($(window).width() > 700) {
+                $('#kiwi').height(nav.calculateKiwiHeight(nav_dom.height()));
+            } else {
+                nav_dom.hide();
+            }
+        });
+
+        var n = kiwi.components.Network();
+        n.on('connect', function(){
+            nav.adButton();
+        });
+
+    })();
+});
+</script> 
+<script type="text/javascript">
+(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/fr_FR/sdk.js#xfbml=1&version=v2.4&appId=292727577526632";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));
+</script>
